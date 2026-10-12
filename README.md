@@ -1,5 +1,8 @@
 # Point Party
 
+Point Party now opens on an account-first education login page. Guests do not see device rosters. See [Account-first school access](docs/reliable-login.md) for the current password-account deployment and safe recovery of browser-local classes into shared online schools. The older email-only setup below remains relevant to legacy family accounts and owner recovery.
+
+
 A colorful classroom point board with growing pets, 14 learning skills, teams,
 mystery boxes, goals, game imports, and a separate workspace for each school.
 

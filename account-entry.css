@@ -1,0 +1,26 @@
+body.account-locked{display:block;background:#f6faf7}
+body.account-locked>:not(#accountEntry){display:none!important}
+#accountEntry[hidden]{display:none}
+#accountEntry{padding:0;margin:0;max-width:none;width:100%;box-sizing:border-box;min-height:100dvh;display:grid;grid-template-columns:1.1fr 1fr;color:#203a31;font-family:system-ui,sans-serif}
+.entry-art{padding:40px 64px;background:#e4f1e6;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
+.entry-brand{position:absolute;top:32px;left:48px;color:#203a31;text-decoration:none;font-size:24px;font-weight:800}
+.entry-art h1{font-size:clamp(32px,4.5vw,60px);letter-spacing:-.04em;line-height:1.12;margin:24px 0 16px}
+.entry-art p{max-width:420px;font-size:18px;line-height:1.6}
+.entry-garden{height:220px;position:relative;max-width:420px;width:100%;border-bottom:8px solid #78aa7e;border-radius:45%}
+.entry-garden span{position:absolute}.entry-sun{right:24px;top:4px;color:#b87a08;font-size:88px;animation:entry-sun 12s linear infinite}
+.entry-book{font-size:96px;left:24px;bottom:12px;animation:entry-float 4s ease-in-out infinite}
+.entry-sprout{font-size:104px;right:44px;bottom:4px;transform-origin:bottom;animation:entry-sway 4s ease-in-out infinite}
+.entry-star{font-size:48px;left:40%;top:16px;color:#96642c;animation:entry-float 3s ease-in-out infinite reverse}
+.entry-panel{display:grid;place-items:center;padding:40px 32px;background:#fff}.entry-form{width:100%;max-width:380px}
+.entry-form h2{font-size:32px;margin:8px 0 16px;line-height:1.2}.entry-form p{line-height:1.6}
+.entry-eyebrow{font-size:12px;font-weight:750;letter-spacing:.12em;color:#48695a}
+.entry-form label{display:block;font-weight:650;margin:20px 0 8px}
+.entry-form input{width:100%;box-sizing:border-box;background:#fff;border:1px solid #aabeb3;border-radius:8px;padding:12px 14px;font:inherit;min-height:48px;color:#203a31}
+.entry-form input:focus{outline:3px solid #aecbb7;outline-offset:2px}
+.entry-form form>.btn{margin-top:24px;width:100%;min-height:48px;background:#286344;color:white;border:0;border-radius:8px;font-weight:700}
+.entry-form .btn:disabled{opacity:.65}.entry-help{font-size:14px;color:#486257}.entry-form details{border-top:1px solid #dce6df;padding-top:16px;font-size:14px}
+.entry-form summary{cursor:pointer}.entry-retry{border:0;background:none;color:#286344;text-decoration:underline;padding:16px 0;font:inherit;font-size:14px}
+#entryMessage{font-size:14px;color:#803e24;min-height:24px}
+@keyframes entry-float{50%{transform:translateY(-12px)}}@keyframes entry-sway{50%{transform:rotate(8deg)}}@keyframes entry-sun{to{transform:rotate(360deg)}}
+@media(max-width:760px){#accountEntry{grid-template-columns:1fr}.entry-art{padding:24px;min-height:190px}.entry-brand{position:static;font-size:20px}.entry-garden{height:80px;max-width:140px;position:absolute;right:12px;top:44px}.entry-garden span{font-size:48px}.entry-star{display:none}.entry-art h1{font-size:28px;margin-top:24px;max-width:65%;position:relative;z-index:1}.entry-art p{font-size:14px;margin:0;max-width:75%}.entry-panel{padding:24px}.entry-form h2{font-size:28px}}
+@media(prefers-reduced-motion:reduce){.entry-garden span{animation:none!important}}
