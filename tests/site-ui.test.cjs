@@ -3,12 +3,12 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 const {JSDOM}=require('jsdom');
-function site(reduced=true){
+function site(reduced=true,accountEntry=false){
  const dom=new JSDOM(fs.readFileSync('index.html','utf8'),{url:'http://localhost/',runScripts:'outside-only',pretendToBeVisual:true}),w=dom.window,ctx=dom.getInternalVMContext();
  w.matchMedia=()=>({matches:reduced,addEventListener(){}});w.scrollTo=()=>{};
  w.HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','');};w.HTMLDialogElement.prototype.close=function(){this.removeAttribute('open');};
  for(const script of w.document.querySelectorAll('script')){
-  if(script.src){const file=script.getAttribute('src').split('?')[0];if(/^https?:/.test(file))continue;vm.runInContext(fs.readFileSync(file,'utf8'),ctx,{filename:file});}
+  if(script.src){const file=script.getAttribute('src').split('?')[0];if(/^https?:/.test(file)||(!accountEntry&&file==='account-entry.js'))continue;vm.runInContext(fs.readFileSync(file,'utf8'),ctx,{filename:file});}
   else if(script.textContent.includes('PartyWorkspace.init()'))vm.runInContext('render();',ctx);
   else vm.runInContext(script.textContent,ctx,{filename:'index-inline.js'});
  }
@@ -127,5 +127,25 @@ test('missed tab events and drafts cannot overwrite newer saved classroom data',
   assert.ok(JSON.parse(h.w.localStorage.getItem(h.run('KEY'))).roster['406']);
   h.run('PW.online=true;');h.w.dispatchEvent(new h.w.StorageEvent('storage',{key:h.run('KEY')}));
   assert.equal(h.w.document.querySelector('#cnames').value,'Draft learner');
+ }finally{h.w.close();}
+});
+
+
+test('account-first entry hides device students and only unlocks a verified school',()=>{
+ const h=site(true,true);try{
+  assert.equal(h.w.document.body.classList.contains('account-locked'),true);
+  assert.equal(h.w.document.querySelector('#classList').textContent,'');
+  assert.equal(h.w.document.querySelector('#view').textContent,'');
+  assert.ok(h.w.document.querySelector('#schoolLoginForm'));
+  h.run(`CLASSES={'405':{names:['Private learner']}};store.roster=CLASSES;ui.cur='405';ui.mode='students';render();`);
+  assert.doesNotMatch(h.w.document.body.textContent,/Private learner/);
+  h.run(`PW.online=true;PW.accountReady=true;PW.passwordRequired=true;render();`);
+  assert.ok(h.w.document.querySelector('#entryConfirm'));
+  assert.equal(h.w.document.querySelector('#view').textContent,'');
+  h.run(`PW.passwordRequired=false;PW.school='school';render();`);
+  assert.equal(h.w.document.body.classList.contains('account-locked'),false);
+  assert.match(h.w.document.querySelector('#view').textContent,/Private learner/);
+  h.run(`PW.leaveOnline();`);
+  assert.equal(h.w.document.querySelector('#view').textContent,'');
  }finally{h.w.close();}
 });
