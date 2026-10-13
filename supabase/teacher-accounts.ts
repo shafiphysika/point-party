@@ -1,7 +1,7 @@
 // Use custom Auth verification (legacy gateway JWT toggle OFF for ECC tokens).
 // getUser and the database admin check below are mandatory. Service keys stay in secrets.
 import {createClient} from 'npm:@supabase/supabase-js@2.117.3';
-const origin='https://shafiphyskia.github.io';
+const origin='https://shafiphysika.github.io';
 const headers={'Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'authorization,apikey,content-type,x-client-info','Access-Control-Allow-Methods':'POST,OPTIONS','Content-Type':'application/json'};
 const reply=(status,body)=>new Response(JSON.stringify(body),{status,headers});
 Deno.serve(async req=>{
@@ -18,14 +18,15 @@ Deno.serve(async req=>{
   if(roleError||admin!==true)return reply(403,{error:'ADMIN_REQUIRED'});
   if(Number(req.headers.get('content-length')||0)>4096)return reply(413,{error:'REQUEST_TOO_LARGE'});
   const raw=await req.text();if(raw.length>4096)return reply(413,{error:'REQUEST_TOO_LARGE'});
-  const body=JSON.parse(raw),username=String(body.username||'').trim().toLowerCase(),password=body.password,school=body.school;
+  const body=JSON.parse(raw),username=String(body.username||'').trim().toLowerCase(),password=body.password,school=body.school,kind=body.kind||'teacher';
+  if(!['teacher','parent','student'].includes(kind)||kind!=='teacher'&&(!/^[a-z0-9_-]{1,32}$/i.test(body.classId||'')||!Number.isInteger(body.seat)||body.seat<1||body.seat>60))return reply(400,{error:'INVALID_ACCOUNT_DETAILS'});
   if(!/^[a-z][a-z0-9._-]{2,31}$/.test(username)||typeof password!=='string'||password.length<12||password.length>128||!/[A-Za-z]/.test(password)||!/[0-9]/.test(password)||!/^[-a-f0-9]{36}$/i.test(school||''))return reply(400,{error:'INVALID_ACCOUNT_DETAILS'});
   const {data:schools,error:schoolError}=await caller.from('pp_schools').select('id').eq('id',school).single();
   if(schoolError||!schools)return reply(400,{error:'SCHOOL_NOT_FOUND'});
   const service=createClient(url,Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'',{auth:{persistSession:false}});
   const {data,error}=await service.auth.admin.createUser({email:username+'@teachers.point-party.invalid',password,email_confirm:true});
   if(error||!data.user)return reply(409,{error:'USERNAME_UNAVAILABLE_OR_ACCOUNT_REJECTED'});
-  const {error:attachError}=await caller.rpc('pp_provision_teacher',{p_user:data.user.id,p_username:username,p_school:school});
+  const {error:attachError}=await caller.rpc(kind==='teacher'?'pp_provision_teacher':'pp_provision_family',kind==='teacher'?{p_user:data.user.id,p_username:username,p_school:school}:{p_user:data.user.id,p_username:username,p_school:school,p_class:body.classId,p_seat:body.seat,p_kind:kind});
   if(attachError){await service.auth.admin.deleteUser(data.user.id);return reply(409,{error:'ACCOUNT_SETUP_FAILED'});}
   return reply(201,{username});
  }catch{return reply(500,{error:'ACCOUNT_SERVICE_UNAVAILABLE'});}
