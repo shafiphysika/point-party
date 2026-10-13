@@ -25,3 +25,5 @@ body:not(.account-locked) :is(input:not([type=checkbox]):not([type=radio]),selec
 @media(max-width:900px){body:not(.account-locked) .panel{padding:16px}.grid{gap:12px}.world-trail{padding:10px 12px}.schoolbar{flex-wrap:wrap}.tablewrap{max-width:100%;overflow:auto}.side .sbtn{min-height:40px}}
 @media(prefers-reduced-motion:reduce){.card:hover:not(.absent){transform:none}.card,.btn,.side .sbtn,.mnav .sbtn{transition:none!important}}
 @media print{.panel,.card,.world-trail,.school-card,.material-card{box-shadow:none!important}}
+
+.clay-dice-buddy img{display:block;width:100%;height:auto;filter:drop-shadow(0 10px 6px #38204433)}.clay-dice-buddy .baby-talk{background:#f6e9dc;color:#745190;border:1px solid #c5a9d3;box-shadow:inset 2px 2px 3px #fff9,0 4px 0 #9673af22}.dice-cinema .clay-dice-buddy{width:clamp(180px,33vh,310px)}
