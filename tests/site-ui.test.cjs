@@ -197,3 +197,28 @@ test('learning camera stays bounded, resets on exit and respects reduced motion 
   }finally{h.w.close();}
  }
 });
+
+
+test('admin class panel edits an exact selected subset and teachers cannot self-select classes',async()=>{
+ const h=site();try{
+  h.run(`CLASSES={'405':{names:['Learner']},'406':{names:['Other']},'407':{names:['Learner']}};store.roster=CLASSES;ui.cur='405';PW.online=true;PW.admin=true;PW.user={id:'admin'};PW.school='a';PW.schools=[{id:'a',name:'Test school'}];PW.permissionsReady=true;PW.classAccessReady=true;PW.classChoices={a:['405','406','407']};PW.members=[{id:'m',school_id:'a',user_id:'teacher',email:'teacher@example.org',status:'approved',class_ids:null,permissions:{points:true}}];ui.mode='account';render();`);
+  const card=h.w.document.querySelector('[data-class-member=m]'),all=card.querySelector('[name=allClasses]');
+  assert.ok(all.checked);all.click();card.querySelector('[value="405"]').click();card.querySelector('[value="407"]').click();
+  let args;h.w.PartyWorkspace.rpc=async(name,value)=>{assert.equal(name,'pp_set_member_classes');args=value;};h.w.PartyWorkspace.loadAccess=async()=>{};h.w.PartyWorkspace.switchOnline=async()=>{};
+  card.querySelector('[data-class-access=save]').click();await new Promise(resolve=>setTimeout(resolve,10));
+  assert.deepEqual(JSON.parse(JSON.stringify(args)),{p_member:'m',p_classes:['405','407']});
+  h.run(`PW.admin=false;PW.user={id:'teacher'};PW.members[0].class_ids=['405','407'];ui.cur='406';ui.mode='account';render();`);
+  assert.equal(h.w.document.querySelector('[data-class-access=save]'),null);assert.equal(h.run("PW.canClass('406')"),false);assert.equal(h.run("PW.can('points')"),false);
+  h.run("ui.cur='405'");assert.equal(h.run("PW.can('points')"),true);
+ }finally{h.w.close();}
+});
+
+test('reward missions route to real skills without auto-awarding and personal milestones follow points',()=>{
+ const h=site();try{
+  h.run(`CLASSES={'405':{names:['Learner']}};store.roster=CLASSES;store.classes={405:PartyCore.sanitizeClass({pts:{1:65}})};ui.cur='405';ui.mode='fame';render();`);
+  const before=h.run('JSON.stringify(store.classes)');assert.equal(h.w.document.querySelectorAll('.reward-token').length,8);
+  h.w.document.querySelector('[data-reward-skill=kindness]').click();assert.equal(h.run('ui.mode'),'students');assert.equal(h.run('sMode'),'skill');assert.equal(h.run('C().pts[1]'),65);
+  h.run('spotlight(1)');assert.equal(h.w.document.querySelectorAll('.personal-rewards .unlocked').length,6);assert.match(h.w.document.querySelector('.personal-rewards').textContent,/35 more points/);
+  assert.equal(h.run('JSON.stringify(store.classes)'),before);
+ }finally{h.w.close();}
+});

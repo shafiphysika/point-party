@@ -1,0 +1,52 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
+const {PGlite}=require('@electric-sql/pglite'),Party=require('../party-core.js'),Portal=require('../portal-core.js'),Materials=require('../materials-core.js');
+test('class scopes protect reads, writes, hidden records, family and private files',async()=>{
+ const db=new PGlite(),admin='00000000-0000-0000-0000-000000000001',teacher='00000000-0000-0000-0000-000000000002';
+ try{
+  await db.exec(`create role anon;create role authenticated;create schema auth;create schema storage;
+   create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz,encrypted_password text);
+   create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
+   grant usage on schema auth,storage to authenticated;grant execute on function auth.uid() to authenticated;
+   create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint);
+   create table storage.objects(id uuid default gen_random_uuid(),bucket_id text,name text);
+   alter table storage.objects enable row level security;grant select,insert on storage.objects to authenticated;`);
+  for(const name of ['schema','platform','materials','permissions','password-accounts','source-access','family-accounts','class-access'])await db.exec(fs.readFileSync('supabase/'+name+'.sql','utf8'));
+  await db.exec(fs.readFileSync('supabase/class-access.sql','utf8'));
+  await db.query('insert into auth.users values($1,$2,now(),$3),($4,$5,now(),$6)',[admin,'shafiphysika@gmail.com','hashA',teacher,'teacher@example.org','hashB']);
+  const as=async id=>{await db.exec('reset role');await db.query("select set_config('request.jwt.claim.sub',$1,false)",[id]);await db.exec('set role authenticated');};
+
+  await as(admin);await db.query('select pp_claim_owner()');const school=(await db.query("select pp_create_school('School') id")).rows[0].id;
+  const resourceId='00000000-0000-0000-0000-000000000003',path=school+'/'+resourceId+'/work.pdf';
+  const data={roster:{405:{names:['Allowed child']},406:{names:['Hidden child']},407:{names:['Second allowed']}},classes:{405:Party.sanitizeClass({}),406:Party.sanitizeClass({pts:{1:42}}),407:Party.sanitizeClass({})},ui:{cur:'406',mode:'students'},portal:Portal.clean({assessments:[{id:'allowed-grade',classId:'405',title:'Allowed grade'}, {id:'hidden-grade',classId:'406',title:'Private grade'}],scores:{'hidden-grade':{1:{score:66,feedback:'Private feedback'}}},attendance:{'2026-10-14':{'405':{'1':'present'},'406':{'1':'absent'}}}}),materials:Materials.clean({resources:[{id:'allowed-resource',classId:'405',title:'Allowed resource',url:'https://example.org/shared'}, {id:resourceId,title:'Private worksheet',path,classId:'406'}],plans:[{id:'hidden-plan',classId:'406',title:'Hidden plan'}],suggestions:[{id:'hidden-note',planId:'hidden-plan',body:'Hidden note'}]}),links:[]};
+  await db.query('select pp_save_school($1,0,$2)',[school,data]);
+  await db.query('insert into storage.objects(bucket_id,name) values($1,$2)',['pp-materials',path]);
+  await db.query('select pp_invite($1,$2)',[school,'teacher@example.org']);await as(teacher);await db.query('select pp_accept_invitations()');const member=(await db.query('select id from pp_memberships')).rows[0].id;
+  await as(admin);await db.query("select pp_review_member($1,'approved')",[member]);await db.query('select pp_set_member_permissions($1,$2)',[member,{points:true,activities:true,materials:true,roster:true,invite:true}]);
+  await assert.rejects(db.query('select pp_set_member_classes($1,$2)',[member,['999']]),/INVALID_CLASSES/);
+  await db.query('select pp_set_member_classes($1,$2)',[member,['405','407']]);await as(teacher);
+  await assert.rejects(db.query('select pp_set_member_classes($1,null)',[member]),/ADMIN_REQUIRED/);
+  let open=(await db.query('select pp_open_school($1) school',[school])).rows[0].school;
+  assert.deepEqual(Object.keys(open.data.roster),['405','407']);assert.equal(open.data.ui.cur,'405');
+  assert.doesNotMatch(JSON.stringify(open.data),/Hidden child|Private feedback|Private worksheet|Hidden note|Hidden plan|hidden-grade/);
+  assert.equal((await db.query('select * from storage.objects')).rows.length,0);
+  assert.equal((await db.query('select * from pp_school_state')).rows.length,0);
+  open.data.classes[405].pts[1]=3;
+  await db.query('select pp_save_school($1,$2,$3)',[school,open.revision,open.data]);
+  await as(admin);let saved=(await db.query('select data from pp_school_state where school_id=$1',[school])).rows[0].data;
+  assert.equal(saved.classes[406].pts[1],42);assert.deepEqual(saved.portal.scores,data.portal.scores);assert.deepEqual(saved.materials,data.materials);assert.deepEqual(saved.portal.attendance,data.portal.attendance);
+  await as(teacher);open=(await db.query('select pp_open_school($1) school',[school])).rows[0].school;
+  let bad=structuredClone(open.data);bad.roster[406]=data.roster[406];bad.classes[406]=data.classes[406];await assert.rejects(db.query('select pp_save_school($1,$2,$3)',[school,open.revision,bad]),/CLASS_ACCESS_REQUIRED/);
+  bad=structuredClone(open.data);bad.portal.assessments.push({...data.portal.assessments[1],classId:'405'});bad.portal.scores['hidden-grade']={1:{score:99}};await assert.rejects(db.query('select pp_save_school($1,$2,$3)',[school,open.revision,bad]),/CLASS_ACCESS_REQUIRED/);
+  bad=structuredClone(open.data);bad.materials.resources.push({...data.materials.resources[1],id:'forged-resource',classId:'405'});await assert.rejects(db.query('select pp_save_school($1,$2,$3)',[school,open.revision,bad]),/CLASS_ACCESS_REQUIRED/);
+  await assert.rejects(db.query("select pp_invite($1,'another@example.org')",[school]),/CLASS_SCOPE_INVITE_REQUIRED/);
+  await assert.rejects(db.query("select pp_invite_family($1,'406',1,'parent@example.org','parent')",[school]),/CLASS_ACCESS_REQUIRED/);
+  await db.exec('reset role');const submission=(await db.query("insert into pp_submissions(school_id,class_id,seat,lesson_id,user_id,body) values($1,'406',1,'hidden',$2,'Private work') returning id",[school,teacher])).rows[0].id;
+  await as(teacher);assert.equal((await db.query('select * from pp_submissions')).rows.length,0);await assert.rejects(db.query("select pp_review_work($1,1,2,'Review')",[submission]),/CLASS_ACCESS_REQUIRED/);
+  await as(admin);await db.query('select pp_set_member_permissions($1,$2)',[member,{points:true}]);await as(teacher);
+  open=(await db.query('select pp_open_school($1) school',[school])).rows[0].school;open.data.materials=Materials.clean(open.data.materials);open.data.classes[405].pts[1]=7;
+  await db.query('select pp_save_school($1,$2,$3)',[school,open.revision,open.data]);
+  await as(admin);saved=(await db.query('select data from pp_school_state where school_id=$1',[school])).rows[0].data;assert.deepEqual(saved.materials,data.materials);assert.equal(saved.classes[406].pts[1],42);
+  await as(admin);await db.query('select pp_set_member_classes($1,$2)',[member,[]]);await as(teacher);assert.deepEqual((await db.query('select pp_open_school($1) school',[school])).rows[0].school.data.roster,{});
+  await as(admin);await db.query('select pp_set_member_classes($1,null)',[member]);await as(teacher);assert.equal(Object.keys((await db.query('select pp_open_school($1) school',[school])).rows[0].school.data.roster).length,3);
+ }finally{await db.close();}
+});
