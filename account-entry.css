@@ -24,3 +24,15 @@ body.account-locked>:not(#accountEntry){display:none!important}
 @keyframes entry-float{50%{transform:translateY(-12px)}}@keyframes entry-sway{50%{transform:rotate(8deg)}}@keyframes entry-sun{to{transform:rotate(360deg)}}
 @media(max-width:760px){#accountEntry{grid-template-columns:1fr}.entry-art{padding:24px;min-height:190px}.entry-brand{position:static;font-size:20px}.entry-garden{height:80px;max-width:140px;position:absolute;right:12px;top:44px}.entry-garden span{font-size:48px}.entry-star{display:none}.entry-art h1{font-size:28px;margin-top:24px;max-width:65%;position:relative;z-index:1}.entry-art p{font-size:14px;margin:0;max-width:75%}.entry-panel{padding:24px}.entry-form h2{font-size:28px}}
 @media(prefers-reduced-motion:reduce){.entry-garden span{animation:none!important}}
+/* Quiet movement stays behind content and never intercepts input. */
+body{background-image:radial-gradient(ellipse at 15% 20%,#85bfa51a,transparent 48%),radial-gradient(ellipse at 85% 75%,#efc6751a,transparent 48%);background-size:130% 130%;animation:grove-sky 24s ease-in-out infinite alternate}
+.entry-art:before,.entry-art:after{content:'';position:absolute;width:260px;height:100px;background:#ffffff55;border-radius:50%;pointer-events:none;animation:grove-cloud 20s ease-in-out infinite alternate}
+.entry-art:before{top:14%;left:-100px}.entry-art:after{bottom:12%;right:-120px;animation-delay:-10s}
+.entry-art>*{z-index:1}.entry-art h1,.entry-art p{position:relative}
+.btn{transition:transform .18s ease,box-shadow .18s ease,background-color .18s ease}
+.btn:hover:not(:disabled){transform:translateY(-2px)}.btn:active:not(:disabled){transform:translateY(1px) scale(.98)}
+.family-qr{display:flex;align-items:center;gap:24px;margin-top:24px;padding:24px;background:var(--soft);border-radius:20px}.family-qr img{background:white;border-radius:12px;flex:none}.family-qr .btn{margin:6px 6px 0 0}
+@keyframes grove-sky{to{background-position:40% 30%,70% 80%}}
+@keyframes grove-cloud{to{transform:translate(60px,-12px)}}
+@media(max-width:600px){.family-qr{flex-direction:column;align-items:flex-start}}
+@media(prefers-reduced-motion:reduce){body,.entry-art:before,.entry-art:after{animation:none}.btn{transition:none}.btn:hover:not(:disabled),.btn:active:not(:disabled){transform:none}}

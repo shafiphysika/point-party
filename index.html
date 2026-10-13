@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Point Party</title>
+<title>ClassGrove</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Point Party">
+<meta name="apple-mobile-web-app-title" content="ClassGrove">
 <meta name="theme-color" content="#172445">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E🐣%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -316,7 +316,7 @@ body.present .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
 <body>
 <div class="app">
   <aside class="side" aria-label="Classes and pages">
-    <div class="brand"><span class="logo" aria-hidden="true">🐣</span><div><b>Point Party</b><small>Every little effort matters</small></div></div>
+    <div class="brand"><span class="logo" aria-hidden="true">🐣</span><div><b>ClassGrove</b><small>Learn. Grow. Belong.</small></div></div>
     <div class="class-heading"><span>Classes</span><button type="button" data-layout="add" aria-label="Add a class" title="Add a class">+</button></div>
     <div id="classList"></div>
     <div id="navList"></div>
@@ -528,9 +528,9 @@ function renderShell(){
   const P=PAGES[ui.mode];
   $("#pageTitle").textContent=P.label;
   $("#pageSub").textContent=ui.cur?`Class ${ui.cur}, ${students(ui.cur).length} students${CLASSES[ui.cur].teacher?", 導師 "+CLASSES[ui.cur].teacher:""}`:"Add your classes to start";
-  $("#phead").innerHTML=`<span class="pi" aria-hidden="true">${P.icon}</span><h2>${ui.cur?"Class "+esc(ui.cur):"Point Party"}</h2><span class="pp">${P.label}</span>`;
+  $("#phead").innerHTML=`<span class="pi" aria-hidden="true">${P.icon}</span><h2>${ui.cur?"Class "+esc(ui.cur):"ClassGrove"}</h2><span class="pp">${P.label}</span>`;
   $("#soundBtn").textContent=ui.sound?"🔊":"🔇";
-  document.title=`${P.label}${ui.cur?" · Class "+ui.cur:""} · Point Party`;
+  document.title=`${P.label}${ui.cur?" · Class "+ui.cur:""} · ClassGrove`;
 }
 const RENDER={};
 function render(){if(!ui.cur&&!["setup","schools","account","family","learning"].includes(ui.mode))ui.mode="setup";renderShell();RENDER[ui.mode]();updateTimerChip();}
@@ -1009,9 +1009,9 @@ function cleanRoster(r){
   return Object.keys(out).length?out:null;
 }
 function restoreBackup(text){
-  let d;try{d=JSON.parse(text);}catch(e){toast("This is not a Point Party backup file");return;}
+  let d;try{d=JSON.parse(text);}catch(e){toast("This is not a ClassGrove backup file");return;}
   const roster=d&&d.app==="point-party"?cleanRoster(d.roster):null;
-  if(!roster){toast("This is not a Point Party backup file");return;}
+  if(!roster){toast("This is not a ClassGrove backup file");return;}
   const when=d.saved?new Date(d.saved).toLocaleString():"an unknown date";
   askConfirm(`Load the backup from ${when}? It has ${Object.keys(roster).length} classes and replaces what is on this device.`,()=>{
     CLASSES=roster;store.roster=CLASSES;
@@ -1123,9 +1123,9 @@ document.addEventListener("keydown",e=>{
   if(e.key==="Enter"&&e.target.matches&&e.target.matches("tr.click")){recordDetail(+e.target.dataset.seat);}
 });
 </script>
-<script src="schools.js?v=20261013b"></script>
+<script src="schools.js?v=20261013c"></script>
 <script src="portal-core.js?v=20261010"></script>
-<script src="portal.js?v=20261010"></script>
+<script src="portal.js?v=20261013"></script>
 <link rel="stylesheet" href="materials.css">
 <script src="materials-core.js"></script>
 <script src="materials.js?v=20261010"></script>
@@ -1140,9 +1140,9 @@ document.addEventListener("keydown",e=>{
 <script src="worlds.js?v=1"></script>
 <link rel="stylesheet" href="classroom-layout.css?v=1">
 <script src="classroom-layout.js?v=1"></script>
-<link rel="stylesheet" href="account-entry.css?v=1">
+<link rel="stylesheet" href="account-entry.css?v=2">
 <script src="account-core.js?v=1"></script>
-<script src="account-entry.js?v=3"></script>
+<script src="account-entry.js?v=4"></script>
 <script>render();initSync();PartyWorkspace.init();</script>
 </body>
 </html>

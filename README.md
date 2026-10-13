@@ -1,6 +1,6 @@
-# Point Party
+# ClassGrove
 
-Point Party now opens on an account-first education login page. Guests do not see device rosters. See [Account-first school access](docs/reliable-login.md) for the current password-account deployment and safe recovery of browser-local classes into shared online schools. The older email-only setup below remains relevant to legacy family accounts and owner recovery.
+ClassGrove now opens on an account-first education login page. Guests do not see device rosters. See [Account-first school access](docs/reliable-login.md) for the current password-account deployment and safe recovery of browser-local classes into shared online schools. The older email-only setup below remains relevant to legacy family accounts and owner recovery.
 
 
 A colorful classroom point board with growing pets, 14 learning skills, teams,
@@ -33,9 +33,9 @@ role selector, or hidden button grants admin privileges.
 2. Enable email authentication and email sign-ups. The site accepts the default
    verified email sign-in link. With custom SMTP, you can also set the **Magic Link**
    email template to show `{{ .Token }}` for optional numeric-code sign-in.
-   Set the site URL to `https://shafiphyskia.github.io/point-party/`. Configure
+   Set the site URL to `https://shafiphysika.github.io/point-party/`. Configure
    production email delivery and the Auth email rate limits in Supabase. Add
-   `https://shafiphyskia.github.io/point-party/` to allowed Auth redirect URLs.
+   `https://shafiphysika.github.io/point-party/` to allowed Auth redirect URLs.
 3. Put the project URL and **publishable key** in `config.js`. Do not place a
    service-role key, password, or personal access token in this repository.
 4. The platform migration designates `shafiphysika@gmail.com` as the intended

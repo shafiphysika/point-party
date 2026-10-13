@@ -1,1 +1,1 @@
-{"name":"point-party","private":true,"scripts":{"test":"node --test --test-concurrency=1 tests/*.cjs"},"devDependencies":{"@electric-sql/pglite":"0.5.8","jsdom":"^30.1.2"}}
+{"name":"point-party","private":true,"scripts":{"test":"node --test --test-concurrency=1 tests/*.cjs"},"devDependencies":{"@electric-sql/pglite":"0.5.8","jsdom":"^30.1.2","qrcode-generator":"^1.4.4"}}
