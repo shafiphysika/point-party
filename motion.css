@@ -1,0 +1,43 @@
+/* Original ClassGrove motion: study tiles, orbit loops and tactile controls. */
+:root{--motion-ease:cubic-bezier(.22,1,.36,1);--motion-spring:cubic-bezier(.2,.8,.2,1.2)}
+.entry-art{background:#153f36;color:#fff9e8;isolation:isolate}
+.entry-brand{color:#fff9e8;z-index:3!important}
+.entry-art:before{width:520px;height:520px;left:-230px;top:-180px;background:radial-gradient(circle,#b9d87c44,transparent 68%);animation:motion-haze 18s ease-in-out infinite alternate}
+.entry-art:after{width:460px;height:460px;right:-240px;bottom:-180px;background:radial-gradient(circle,#f4af8c44,transparent 70%);animation:motion-haze 22s ease-in-out infinite alternate-reverse}
+.entry-art h1{font-weight:800;max-width:480px;letter-spacing:-.045em}
+.entry-art h1 span{display:block;animation:motion-title .8s var(--motion-ease) both}.entry-art h1 span+span{color:#d5ea9d;animation-delay:.12s}
+.entry-art p{color:#d4e4d7;max-width:390px}
+.entry-garden{height:248px;max-width:420px;border:0;border-radius:0;margin-top:40px;isolation:isolate}
+.entry-garden:before{content:'';position:absolute;width:240px;height:240px;left:70px;top:0;border:1px solid #c9e7b466;border-radius:50%;transform:rotate(-22deg) scaleX(1.5);animation:motion-orbit 20s ease-in-out infinite alternate;z-index:-1}
+.entry-garden:after{content:'';position:absolute;width:180px;height:180px;left:95px;top:40px;border-radius:40%;background:#c7e795;animation:motion-shape 12s ease-in-out infinite alternate;z-index:-1}
+.entry-book{background:#fff9ed;border-radius:24px;box-shadow:0 12px 0 #102e2444;padding:8px 14px;left:38px!important;bottom:28px!important;rotate:-12deg;z-index:2}
+.entry-sprout{right:30px!important;bottom:8px!important;z-index:2}.entry-sun{right:4px!important;top:0!important;color:#ffd379!important;font-size:76px!important}.entry-star{color:#ffbca0!important;top:10px!important;left:25%!important;font-size:32px!important}
+.entry-ticket{display:grid;place-items:center;font-weight:800;font-size:26px;line-height:1;color:#254637;box-shadow:0 8px 0 #102e2444;animation:motion-tile 7s ease-in-out infinite;position:absolute}
+.entry-ticket.letters{width:76px;height:76px;border-radius:18px;background:#ffc6a8;left:0;top:8px;rotate:12deg}
+.entry-ticket.numbers{width:92px;height:58px;border-radius:16px;background:#fff9ed;right:24px;top:85px;rotate:9deg;animation-delay:-3s;font-size:22px}
+.entry-ticket.spark{width:44px;height:44px;border-radius:50%;background:#d5ea9d;left:53%;bottom:0;animation-delay:-1.5s;font-size:24px}
+.entry-panel{background:#fffdf7}.entry-form{animation:motion-title .7s var(--motion-ease) .1s both}
+.entry-form input{background:#fffefb;border-radius:12px;transition:border-color .2s,box-shadow .2s}.entry-form input:focus{border-color:#286344;box-shadow:0 0 0 5px #2863440c;outline:2px solid #7ea78b}
+.btn,.world-play,.screen-choices button{position:relative;isolation:isolate;transition:transform .3s var(--motion-spring),translate .3s var(--motion-spring),box-shadow .3s,background-color .2s;overflow:hidden}
+.btn.go:before,.world-play:before{content:'';position:absolute;inset:0;pointer-events:none;z-index:-1;background:linear-gradient(110deg,transparent 15%,#ffffff26 45%,#ffffff42 50%,transparent 75%);transform:translateX(-130%);transition:transform .6s var(--motion-ease)}
+.btn.go:hover:not(:disabled):before,.btn.go:focus-visible:before,.world-play:hover:before,.world-play:focus-visible:before{transform:translateX(130%)}
+.btn:hover:not(:disabled),.world-play:hover{transform:translateY(-3px);translate:0 0;box-shadow:0 6px 0 #153f3618}.btn:active:not(:disabled),.world-play:active{transform:translateY(1px) scale(.97);box-shadow:none;translate:0 0}
+.btn:focus-visible,.world-play:focus-visible{outline:3px solid #96b578;outline-offset:3px}
+.entry-form form>.btn{border-radius:12px;background:#225c43;box-shadow:0 4px 0 #133e2b;min-height:52px}
+.entry-form form>.btn:hover:not(:disabled){background:#286f50;box-shadow:0 7px 0 #133e2b}
+body:not(.account-locked){background-image:radial-gradient(ellipse at 8% 20%,#94c49a24,transparent 48%),radial-gradient(ellipse at 90% 75%,#e9b45b1c,transparent 45%);background-size:150% 150%}
+#view>:not(.world-trail){animation:motion-arrive .48s var(--motion-ease) both}#view>:nth-child(3){animation-delay:.06s}#view>:nth-child(4){animation-delay:.1s}#view>:nth-child(5){animation-delay:.14s}
+.school-card,.material-card,.lesson-item{transition:border-color .25s,box-shadow .25s}.school-card:hover,.material-card:hover,.lesson-item:hover{border-color:#8aaf96;box-shadow:0 4px 14px #153f3610}
+@keyframes motion-title{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes motion-arrive{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes motion-tile{50%{transform:translateY(-12px) rotate(-5deg)}}
+@keyframes motion-shape{to{transform:rotate(70deg);border-radius:50% 35% 45% 40%}}
+@keyframes motion-orbit{to{transform:rotate(22deg) scaleX(1.5)}}
+@keyframes motion-haze{to{transform:translate(80px,60px) scale(1.12)}}
+@media(max-width:760px){.entry-art{padding:24px;min-height:240px}.entry-garden{width:105px;height:140px;right:8px;top:74px;margin:0}.entry-garden:before{width:100px;height:100px;left:12px;top:4px}.entry-garden:after{width:88px;height:88px;left:18px;top:20px}.entry-book{font-size:40px!important;left:0!important;bottom:20px!important;padding:5px 8px;border-radius:14px}.entry-sprout{font-size:48px!important;right:-10px!important;bottom:0!important}.entry-sun{font-size:40px!important;right:-8px!important;top:-8px!important}.entry-ticket.letters{font-size:16px;width:42px;height:42px;top:-12px;left:0;border-radius:10px}.entry-ticket.numbers,.entry-ticket.spark{display:none}.entry-art h1{font-size:32px;max-width:65%;margin-top:36px}.entry-art p{max-width:68%;font-size:14px}.entry-panel{padding:28px 24px}.entry-form{max-width:440px}}
+/* Pausing freezes ambient loops; content stays visible and controls keep working. */
+body.v-paused .entry-ticket,body.v-paused .entry-garden:before,body.v-paused .entry-garden:after{animation-play-state:paused!important}
+body.v-paused .entry-art h1 span,body.v-paused .entry-form,body.v-paused #view>:not(.world-trail){animation:none!important}
+body.v-paused .btn:before,body.v-paused .world-play:before{transition:none;display:none}
+@media(prefers-reduced-motion:reduce){.entry-art h1 span,.entry-form,.entry-ticket,.entry-garden:before,.entry-garden:after,#view>:not(.world-trail){animation:none!important}.btn,.world-play,.screen-choices button{transition:none!important}.btn:before,.world-play:before{display:none}.btn:hover:not(:disabled),.world-play:hover,.btn:active:not(:disabled),.world-play:active{transform:none!important;translate:0 0!important}}
+@media print{.entry-garden{display:none}*,*:before,*:after{animation:none!important;transition:none!important}}
