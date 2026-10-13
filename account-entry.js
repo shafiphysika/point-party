@@ -19,9 +19,11 @@
  W.openVerifiedSession=async function(epoch){
   const {data,error}=await this.client.auth.getUser();if(error)throw error;
   if(!data.user)throw new Error('SIGN_IN_REQUIRED');
+  if(epoch!==this.authEpoch)return;
   this.accountSetupReady=false;this.passwordRequired=false;this.accountReady=false;
   try{
    const account=await this.rpc('pp_account_status');
+   if(epoch!==this.authEpoch)return;
    this.accountSetupReady=true;this.passwordRequired=account?.must_change_password===true;
    if(this.passwordRequired){this.user=data.user;this.online=true;this.accountMessage='';render();return;}
   }catch(error){if(!this.missingSetup(error))throw error;}
