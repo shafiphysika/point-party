@@ -22,5 +22,5 @@ test('original die has visible six-sided pips and machine has its own chamber',(
  assert.match(dice.markup('original'),/dice-face face-6/);
  assert.doesNotMatch(dice.markup('original'),/baby-dice\.png/);
  assert.match(dice.markup('machine'),/machine-chamber/);
- assert.match(dice.markup('show'),/buddy-arm/);
+ assert.match(dice.markup('show'),/clay-dice-buddy/);assert.match(dice.markup('show'),/assets\/clay-teacher\.png/);
 });

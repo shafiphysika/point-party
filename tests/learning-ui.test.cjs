@@ -31,11 +31,11 @@ test('teacher prompt builder preserves topic and grade without starting a model 
  }finally{h.dom.window.close();}
 });
 
-test('all supplied friends are selectable and motion pause keeps controls available',()=>{
+test('all supplied friends remain selectable without a manual motion toggle',()=>{
  const h=harness();try{
   const select=h.w.document.querySelector('#learningFriend');assert.equal(select.options.length,5);select.value='snow';select.dispatchEvent(new h.w.Event('change',{bubbles:true}));
   assert.match(h.w.document.querySelector('.learning-friend img').getAttribute('src'),/snow-friend/);
-  h.click('motion');assert.equal(h.w.document.body.classList.contains('v-paused'),true);assert.match(h.w.document.querySelector('[data-learning="motion"]').textContent,/Resume/);
+  assert.equal(h.w.document.querySelector('[data-learning="motion"]'),null);
  }finally{h.dom.window.close();}
 });
 test('dice show displays the exact winner as text, exposes controls, and cleans up the dialog',()=>{

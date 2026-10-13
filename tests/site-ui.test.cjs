@@ -3,8 +3,9 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 const {JSDOM}=require('jsdom');
-function site(reduced=true,accountEntry=false){
+function site(reduced=true,accountEntry=false,legacyPause=false){
  const dom=new JSDOM(fs.readFileSync('index.html','utf8'),{url:'http://localhost/',runScripts:'outside-only',pretendToBeVisual:true}),w=dom.window,ctx=dom.getInternalVMContext();
+ if(legacyPause){w.localStorage.setItem('pointparty-motion','paused');w.document.body.classList.add('v-paused');}
  w.matchMedia=()=>({matches:reduced,addEventListener(){}});w.scrollTo=()=>{};
  w.HTMLDialogElement.prototype.showModal=function(){this.setAttribute('open','');};w.HTMLDialogElement.prototype.close=function(){this.removeAttribute('open');};
  for(const script of w.document.querySelectorAll('script')){
@@ -56,32 +57,29 @@ test('every page gets one unique adventure ribbon and re-rendering never changes
   assert.equal(worlds.size,5);assert.equal(titles.size,20);
  }finally{h.w.close();}
 });
-test('motion preference survives page changes and reduced motion gives a quiet cheer',()=>{
+test('motion controls are absent and device reduced motion still gives a quiet cheer',()=>{
  const h=site();try{
-  h.run(`ui.mode='learning';render();`);
-  h.w.document.querySelector('[data-world="motion"]').click();
-  assert.equal(h.w.localStorage.getItem('pointparty-motion'),'paused');
-  h.w.document.querySelector('[data-act="nav"][data-page="account"]').click();
-  assert.equal(h.w.document.querySelector('[data-world="motion"]').getAttribute('aria-pressed'),'true');
-  h.w.document.querySelector('[data-world="play"]').click();
-  assert.ok(h.w.document.querySelector('.world-message').textContent.length>0);
-  assert.equal(h.w.document.querySelector('.world-particles'),null);
-  h.w.document.querySelector('[data-world="motion"]').click();
-  h.w.document.querySelector('[data-world="play"]').click();
-  assert.equal(h.w.document.querySelector('.world-particles'),null); // matchMedia requests reduced motion.
+  for(const mode of ['learning','account','picker','students']){
+   h.run(`ui.mode='${mode}';render();`);
+   assert.equal(h.w.document.querySelector('[data-world="motion"],[data-visual="pause"],[data-learning="motion"]'),null);
+   h.w.document.querySelector('[data-world="play"]').click();
+   assert.ok(h.w.document.querySelector('.world-message').textContent.length>0);
+   assert.equal(h.w.document.querySelector('.world-particles'),null);
+  }
  }finally{h.w.close();}
 });
+
 test('mascot celebration is bounded and direct learning tab renders retain the world controls',async()=>{
  const h=site(false);try{
   h.run(`ui.mode='learning';render();`);
   h.w.document.querySelector('[data-world="play"]').click();h.w.document.querySelector('[data-world="play"]').click();
   assert.equal(h.w.document.querySelectorAll('.world-particles').length,1);
   assert.equal(h.w.document.querySelectorAll('.world-particles b').length,12);
-  h.w.document.querySelector('[data-world="motion"]').click();assert.equal(h.w.document.querySelector('.world-particles'),null);
+  h.w.document.querySelector('[data-learning="tab"][data-tab="numbers"]').click();
   h.w.document.querySelector('[data-learning="tab"][data-tab="numbers"]').click();
   await Promise.resolve();
   assert.equal(h.w.document.querySelectorAll('.world-trail').length,1);
-  assert.equal(h.w.document.querySelector('[data-world="motion"]').getAttribute('aria-pressed'),'true');
+  assert.equal(h.w.document.querySelector('[data-world="motion"]'),null);
   assert.ok(h.w.document.querySelector('[data-learning="start"]'));
  }finally{h.w.close();}
 });
@@ -171,5 +169,13 @@ test('sign-out cancels a pending first-password entry without reopening the acco
   h.run(`PW.client={auth:{getUser:async()=>({data:{user:{id:'teacher'}}})}};PW.rpc=window.accountRPC;`);
   const pending=h.run('PW.enterOnline()');await started;h.run('PW.authEpoch++');release({must_change_password:true});await pending;
   assert.equal(h.run('PW.online'),false);assert.equal(h.w.document.querySelector('#entryConfirm'),null);
+ }finally{h.w.close();}
+});
+
+test('legacy pause settings no longer stop motion or expose manual controls',()=>{
+ const h=site(false,true,true);try{
+  assert.equal(h.w.document.body.classList.contains('v-paused'),false);
+  assert.equal(h.w.document.querySelector('[data-entry="motion"],[data-world="motion"],[data-learning="motion"],[data-visual="pause"]'),null);
+  assert.equal(h.w.document.querySelector('#accountEntry').hidden,false);
  }finally{h.w.close();}
 });
