@@ -21,6 +21,7 @@ window.PartyWorkspace={
     if(epoch!==this.authEpoch||(this.online&&this.user?.id===session.user.id))return;
     if(this.entering){try{await this.entering;}catch{}}
     if(epoch!==this.authEpoch)return;
+    if(this.online&&this.user?.id===session.user.id)return;
     if(this.online)this.leaveOnline();
     try{await this.enterOnline();}
     catch(error){this.status=PortalCore.authError(error);ui.mode='account';render();}
