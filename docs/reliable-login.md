@@ -5,7 +5,7 @@ Opening Point Party shows the education login page. Device rosters are retained 
 ## Backend deployment
 
 1. Apply `supabase/password-accounts.sql` after the existing four migrations.
-2. Deploy `supabase/teacher-accounts.ts` as the `teacher-accounts` Supabase Edge Function. Keep JWT verification enabled. The function independently verifies the caller with Auth and checks the database admin role before using the server-only service-role secret.
+2. Deploy `supabase/teacher-accounts.ts` as the `teacher-accounts` Supabase Edge Function. For projects using ECC signing keys, turn OFF the legacy-only gateway JWT toggle and use this function's mandatory custom Auth verification. The function verifies the caller with Auth and checks the database admin role before using the server-only service-role secret. Do not remove either check. The legacy-only gateway option rejects valid ECC user sessions.
 3. The owner signs in with the existing verified email identity and sets their own password through My account. If necessary, use the existing owner email recovery. Password entry and changes must be completed by the account holder.
 4. In My account, create co-teacher accounts using a username, temporary password and school. Share the credentials privately. No invitation email is needed. Teachers must choose their own password on first login.
 5. Use the existing teacher permission panel to grant points, activity/grade editing, material editing/uploads, roster/attendance editing and invitation rights per school. Revocation blocks school reads and writes. These editing rights do not constitute field-level read restrictions inside an approved school.
