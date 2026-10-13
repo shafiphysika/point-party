@@ -179,3 +179,21 @@ test('legacy pause settings no longer stop motion or expose manual controls',()=
   assert.equal(h.w.document.querySelector('#accountEntry').hidden,false);
  }finally{h.w.close();}
 });
+
+
+test('learning camera stays bounded, resets on exit and respects reduced motion without changing data',()=>{
+ for(const reduced of [false,true]){
+  const h=site(reduced);try{
+   let frame;h.w.requestAnimationFrame=fn=>{frame=fn;return 1;};
+   const trail=h.w.document.querySelector('.world-trail');
+   trail.getBoundingClientRect=()=>({left:0,top:0,width:100,height:100});
+   const before=h.run('JSON.stringify(store)');
+   trail.dispatchEvent(new h.w.MouseEvent('pointermove',{bubbles:true,clientX:900,clientY:-900}));
+   if(reduced){assert.equal(frame,undefined);assert.equal(trail.style.getPropertyValue('--scene-x'),'');}
+   else {frame();assert.equal(trail.style.getPropertyValue('--scene-x'),'8deg');assert.equal(trail.style.getPropertyValue('--scene-y'),'5deg');
+    trail.dispatchEvent(new h.w.MouseEvent('pointerout',{bubbles:true,relatedTarget:h.w.document.body}));
+    assert.equal(trail.style.getPropertyValue('--scene-x'),'');assert.equal(trail.style.getPropertyValue('--scene-y'),'');}
+   assert.equal(h.run('JSON.stringify(store)'),before);
+  }finally{h.w.close();}
+ }
+});
