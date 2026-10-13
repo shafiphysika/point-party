@@ -1,4 +1,5 @@
-// Deploy with JWT verification enabled. The service key stays in function secrets.
+// Use custom Auth verification (legacy gateway JWT toggle OFF for ECC tokens).
+// getUser and the database admin check below are mandatory. Service keys stay in secrets.
 import {createClient} from 'npm:@supabase/supabase-js@2.117.3';
 const origin='https://shafiphyskia.github.io';
 const headers={'Access-Control-Allow-Origin':origin,'Access-Control-Allow-Headers':'authorization,apikey,content-type,x-client-info','Access-Control-Allow-Methods':'POST,OPTIONS','Content-Type':'application/json'};
