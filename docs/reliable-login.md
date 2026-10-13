@@ -4,11 +4,11 @@ Opening Point Party shows the education login page. Device rosters are retained 
 
 ## Backend deployment
 
-1. Apply `supabase/password-accounts.sql` after the existing four migrations.
+1. Apply `supabase/password-accounts.sql` after the existing four migrations, followed by `supabase/source-access.sql`.
 2. Deploy `supabase/teacher-accounts.ts` as the `teacher-accounts` Supabase Edge Function. For projects using ECC signing keys, turn OFF the legacy-only gateway JWT toggle and use this function's mandatory custom Auth verification. The function verifies the caller with Auth and checks the database admin role before using the server-only service-role secret. Do not remove either check. The legacy-only gateway option rejects valid ECC user sessions.
 3. The owner signs in with the existing verified email identity and sets their own password through My account. If necessary, use the existing owner email recovery. Password entry and changes must be completed by the account holder.
 4. In My account, create co-teacher accounts using a username, temporary password and school. Share the credentials privately. No invitation email is needed. Teachers must choose their own password on first login.
-5. Use the existing teacher permission panel to grant points, activity/grade editing, material editing/uploads, roster/attendance editing and invitation rights per school. Revocation blocks school reads and writes. These editing rights do not constitute field-level read restrictions inside an approved school.
+5. Use the existing teacher permission panel to grant points, activity/grade editing, material editing/uploads, roster/attendance editing and invitation rights per school. Revocation blocks school reads and writes. Materials permission also controls reading and downloading shared resources. Teachers without it receive a server projection without shared plans, resource URLs or suggestions, and cannot bypass that restriction through direct table reads or file downloads. The other grants control editing within an approved school.
 
 The username maps to an internal Auth email at `teachers.point-party.invalid`; that address is an identifier and is never used for email delivery. Passwords are hashed and stored by Supabase Auth, never by the school JSON or teacher-account table. The first-password flag can only be cleared by a server trigger observing a real Auth password-hash change; client metadata cannot bypass it. Existing verified email accounts are unaffected by the new temporary-password rule.
 
