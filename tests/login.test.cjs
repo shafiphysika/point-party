@@ -113,6 +113,19 @@ test('concurrent OTP and auth event entry authorizes once and keeps the active s
  workspace.school='active';await workspace.enterOnline();assert.equal(workspace.school,'active');
 });
 
+test('a same-account auth callback waiting for entry cannot clear the freshly opened school',async()=>{
+ const {workspace,context}=loginHarness();let callback,release,cleared=0,opened=0;const pending=[];
+ context.setTimeout=fn=>pending.push(fn);
+ workspace.client={auth:{onAuthStateChange:fn=>{callback=fn;return {data:{subscription:{}}};}}};
+ workspace.entering=new Promise(resolve=>release=resolve);
+ workspace.leaveOnline=()=>{cleared++;workspace.online=false;workspace.school=null;};
+ workspace.enterOnline=async()=>{opened++;};
+ workspace.bindAuth();callback('INITIAL_SESSION',{user:{id:'teacher'}});
+ const deferred=pending.shift()();
+ workspace.online=true;workspace.user={id:'teacher'};workspace.school='remembered-school';release();await deferred;
+ assert.equal(cleared,0);assert.equal(opened,0);assert.equal(workspace.school,'remembered-school');
+});
+
 test('queued sign-in cannot reopen a workspace after sign-out',async()=>{
  const {workspace,context}=loginHarness();let callback,opened=0;const pending=[];
  context.setTimeout=fn=>pending.push(fn);workspace.client={auth:{onAuthStateChange:fn=>{callback=fn;return {data:{subscription:{}}};}}};
