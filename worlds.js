@@ -1,4 +1,4 @@
-/* Point Party's five illustrated worlds. This module never writes classroom data. */
+/* ClassGrove's five illustrated worlds. This module never writes classroom data. */
 (()=>{
  const scenes={
   dashboard:['garden','A fresh day to grow','Little steps can lead to wonderful discoveries.','Grow a rainbow'],
@@ -48,7 +48,7 @@
   document.body.dataset.world=world;
   if(view.querySelector('.world-trail'))return;
   const trail=document.createElement('section');trail.className='world-trail';trail.dataset.page=ui.mode;trail.setAttribute('aria-label','Classroom adventure');
-  trail.innerHTML=`<div class="world-illustration">${svg(world)}</div><div class="world-copy"><small>POINT PARTY · ${world==='workshop'?'IDEA WORKSHOP':world.toUpperCase()+' WORLD'}</small><h2>${title}</h2><p>${description}</p><div class="world-controls"><button type="button" class="world-play" data-world="play">${action} <span aria-hidden="true">✦</span></button><button type="button" class="world-motion" data-world="motion" aria-pressed="${document.body.classList.contains('v-paused')}">${document.body.classList.contains('v-paused')?'Resume animation':'Pause animation'}</button><span class="world-message" role="status"></span></div></div><div class="world-scenery" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>`;
+  trail.innerHTML=`<div class="world-illustration">${svg(world)}</div><div class="world-copy"><small>CLASSGROVE · ${world==='workshop'?'IDEA WORKSHOP':world.toUpperCase()+' WORLD'}</small><h2>${title}</h2><p>${description}</p><div class="world-controls"><button type="button" class="world-play" data-world="play">${action} <span aria-hidden="true">✦</span></button><button type="button" class="world-motion" data-world="motion" aria-pressed="${document.body.classList.contains('v-paused')}">${document.body.classList.contains('v-paused')?'Resume animation':'Pause animation'}</button><span class="world-message" role="status"></span></div></div><div class="world-scenery" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>`;
   view.prepend(trail);
  }
  new MutationObserver(decorate).observe(view,{childList:true});
