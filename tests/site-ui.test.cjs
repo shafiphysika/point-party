@@ -162,3 +162,14 @@ test('denied material access disables navigation and hides a previously opened r
   assert.ok(h.w.document.querySelector('[data-material="tab"]'));
  }finally{h.w.close();}
 });
+
+
+test('sign-out cancels a pending first-password entry without reopening the account',async()=>{
+ const h=site(true,true);try{
+  let release,entered;const started=new Promise(resolve=>entered=resolve);
+  h.w.accountRPC=async()=>{entered();return new Promise(resolve=>release=resolve);};
+  h.run(`PW.client={auth:{getUser:async()=>({data:{user:{id:'teacher'}}})}};PW.rpc=window.accountRPC;`);
+  const pending=h.run('PW.enterOnline()');await started;h.run('PW.authEpoch++');release({must_change_password:true});await pending;
+  assert.equal(h.run('PW.online'),false);assert.equal(h.w.document.querySelector('#entryConfirm'),null);
+ }finally{h.w.close();}
+});

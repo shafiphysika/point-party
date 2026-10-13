@@ -25,7 +25,7 @@ test('temporary passwords block school reads and writes until Auth changes the p
    create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint);
    create table storage.objects(id uuid default gen_random_uuid(),bucket_id text,name text);
    alter table storage.objects enable row level security;grant select,insert on storage.objects to authenticated;`);
-  for(const name of ['schema','platform','materials','permissions','password-accounts'])await db.exec(fs.readFileSync('supabase/'+name+'.sql','utf8'));
+  for(const name of ['schema','platform','materials','permissions','password-accounts','family-accounts'])await db.exec(fs.readFileSync('supabase/'+name+'.sql','utf8'));
   await db.exec(fs.readFileSync('supabase/password-accounts.sql','utf8'));
   await db.query('insert into auth.users values($1,$2,now(),$3),($4,$5,now(),$6)',[admin,'shafiphysika@gmail.com','hashA',teacher,'teacher405@teachers.point-party.invalid','hashB']);
   const as=async id=>{await db.exec('reset role');await db.query("select set_config('request.jwt.claim.sub',$1,false)",[id]);await db.exec('set role authenticated');};
@@ -48,5 +48,21 @@ test('temporary passwords block school reads and writes until Auth changes the p
   const member=(await db.query('select id from pp_memberships')).rows[0].id;
   await db.query("select pp_review_member($1,'revoked')",[member]);await as(teacher);
   assert.equal((await db.query('select * from pp_school_state')).rows.length,0);
+
+  await db.exec('reset role');
+  const parent='00000000-0000-0000-0000-000000000003';
+  await db.query('insert into auth.users values($1,$2,now(),$3)',[parent,'parent405@teachers.point-party.invalid','tempHash']);
+  await as(admin);await assert.rejects(db.query('select pp_provision_family($1,$2,$3,$4,$5,$6)',[parent,'parent405',school,'405',2,'parent']),/STUDENT_REQUIRED/);
+  await db.query('select pp_provision_family($1,$2,$3,$4,$5,$6)',[parent,'parent405',school,'405',1,'parent']);
+  await db.exec('reset role');const link=(await db.query('select id from pp_family_links where user_id=$1',[parent])).rows[0].id;
+  await as(parent);assert.equal((await db.query('select * from pp_family_links')).rows.length,0);
+  await assert.rejects(db.query('select pp_family_feed($1)',[link]),/PASSWORD_CHANGE_REQUIRED/);
+  await db.exec('reset role');await db.query('update auth.users set encrypted_password=$1 where id=$2',['newParentHash',parent]);
+  await as(parent);assert.equal((await db.query('select * from pp_school_state')).rows.length,0);
+  assert.equal((await db.query('select pp_family_feed($1) data',[link])).rows[0].data.name,'Private');
+  await assert.rejects(db.query('select pp_submit_work($1,$2,$3,$4)',[link,'anything','parent work',[]]),/STUDENT_REQUIRED/);
+  await assert.rejects(db.query('select pp_provision_family($1,$2,$3,$4,$5,$6)',[parent,'parent405',school,'405',1,'parent']),/ADMIN_REQUIRED/);
+  await as(admin);await db.query('select pp_revoke_family($1)',[link]);await as(parent);
+  await assert.rejects(db.query('select pp_family_feed($1)',[link]),/LINK_REQUIRED/);
  }finally{await db.close();}
 });

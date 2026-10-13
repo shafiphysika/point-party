@@ -30,3 +30,10 @@ test('failed membership setup rolls back only the newly-created account',async()
  assert.equal(result.status,409);assert.equal(h.calls.find(c=>c.rollback).rollback,'teacher');
  const duplicate=handler({createError:true});assert.equal((await duplicate.serve(duplicate.request({username:'teacher405',password:'TemporaryTest123',school:'00000000-0000-0000-0000-000000000001'}))).status,409);assert.equal(duplicate.calls.some(c=>c.rollback),false);
 });
+
+test('family account service validates child and role, then uses the private family provisioner',async()=>{
+ const h=handler(),base={username:'parent405',password:'TemporaryTest123',school:'00000000-0000-0000-0000-000000000001'};
+ for(const fields of [{kind:'admin'},{kind:'parent',classId:'405',seat:0},{kind:'student',classId:'405',seat:1.5}])assert.equal((await h.serve(h.request({...base,...fields}))).status,400);
+ assert.equal(h.calls.some(c=>c.create),false);
+ const result=await h.serve(h.request({...base,kind:'parent',classId:'405',seat:1}));assert.equal(result.status,201);assert.ok(h.calls.includes('pp_provision_family'));assert.ok(!h.calls.includes('pp_provision_teacher'));
+});

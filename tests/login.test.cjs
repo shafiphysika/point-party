@@ -8,7 +8,7 @@ function loginHarness(){
  const source=fs.readFileSync('schools.js','utf8');
  vm.runInContext(source.slice(0,source.indexOf('const PW=')),context);
  const workspace=context.window.PartyWorkspace;
- workspace.originalLoadAccess=workspace.loadAccess;
+ workspace.originalLoadAccess=workspace.loadAccess;workspace.originalSwitchOnline=workspace.switchOnline;
  workspace.loadAccess=async()=>events.push('authorize');
  workspace.applyStore=()=>events.push('open-cloud');
  workspace.switchOnline=async(id)=>events.push('school:'+id);
@@ -135,4 +135,34 @@ test('only the global admin sees the permission editing panel',()=>{
  context.RENDER.account();assert.doesNotMatch(context.view.innerHTML,/data-party="savepermissions"/);
  workspace.admin=true;context.RENDER.account();assert.match(context.view.innerHTML,/data-party="savepermissions"/);assert.match(context.view.innerHTML,/Allow activities/);
  workspace.permissionsReady=false;context.RENDER.account();assert.doesNotMatch(context.view.innerHTML,/data-party="savepermissions"/);assert.match(context.view.innerHTML,/permissions.sql database migration/);
+});
+
+test('a different signed-in account waits for old entry to finish, then clears the old workspace',async()=>{
+ const {workspace,context}=loginHarness();let callback,release,opened=0,cleared=0;const pending=[];
+ context.setTimeout=fn=>pending.push(fn);workspace.client={auth:{onAuthStateChange:fn=>{callback=fn;return {data:{subscription:{}}};}}};
+ workspace.online=true;workspace.user={id:'owner'};workspace.entering=new Promise(resolve=>release=resolve);
+ workspace.leaveOnline=()=>{cleared++;workspace.online=false;workspace.user=null;};
+ workspace.enterOnline=async()=>{opened++;workspace.online=true;workspace.user={id:'teacher'};};
+ workspace.bindAuth();callback('INITIAL_SESSION',{user:{id:'owner'}});callback('SIGNED_IN',{user:{id:'teacher'}});
+ await pending[0]();const next=pending[1]();assert.equal(opened,0);release();await next;
+ assert.equal(opened,1);assert.ok(cleared>=1);assert.equal(workspace.user.id,'teacher');
+});
+
+test('a school read from the previous account cannot replace the new account school',async()=>{
+ const {workspace,context,events}=loginHarness();let release;
+ context.rolling=false;workspace.online=true;workspace.user={id:'owner'};workspace.schools=[{id:'old-school'}];workspace.sourceAccessReady=true;
+ workspace.renderBar=()=>{};workspace.setStatus=()=>{};workspace.rpc=()=>new Promise(resolve=>release=resolve);
+ const old=workspace.originalSwitchOnline('old-school');workspace.authEpoch++;workspace.user={id:'teacher'};workspace.school='new-school';workspace.busy=true;
+ release({data:{roster:{}},revision:99});await old;
+ assert.equal(workspace.school,'new-school');assert.equal(workspace.busy,true);assert.equal(events.includes('open-cloud'),false);
+});
+
+test('a save response from the previous account cannot alter the new account revision or save flag',async()=>{
+ const {workspace,context}=loginHarness();let release;
+ context.store={roster:{}};context.setTimeout=()=>0;
+ workspace.online=true;workspace.school='old-school';workspace.dirty=true;workspace.renderBar=()=>{};workspace.setStatus=()=>{};
+ workspace.rpc=()=>new Promise(resolve=>release=resolve);
+ const old=workspace.flush();workspace.authEpoch++;workspace.school='new-school';workspace.revision=7;workspace.saving=true;
+ release(99);await old;
+ assert.equal(workspace.revision,7);assert.equal(workspace.saving,true);
 });
