@@ -49,7 +49,7 @@
    const sky=document.createElement('div');sky.className='v-sky';sky.setAttribute('aria-hidden','true');
    sky.innerHTML=Array.from({length:7},(_,i)=>`<span class="v-orbit" style="--i:${i};--x:${8+i*13}%;--y:${i%2?75:18}%">${i%3?'✦':'○'}</span>`).join('');hero.prepend(sky);
    const controls=document.createElement('div');controls.className='v-play-controls';
-   controls.innerHTML=`<button type="button" class="v-fun-button" data-visual="dance">Let's dance! <span aria-hidden="true">✦</span></button><button type="button" class="v-motion-button" data-visual="pause" aria-pressed="${paused}">${paused?'Resume animation':'Pause animation'}</button>`;
+   controls.innerHTML=`<button type="button" class="v-fun-button" data-visual="dance">Let's dance! <span aria-hidden="true">✦</span></button>`;
    hero.querySelector('.hero-icon,.party-mascot').nextElementSibling.appendChild(controls);
   });
   document.querySelectorAll('.material-meta>span:first-child').forEach(el=>{const kind=el.textContent.trim().split(/\s+/).pop();if(['slides','video','game','board','worksheet','audio','file','link'].includes(kind))el.innerHTML=icon({slides:'lessons',worksheet:'file',audio:'video'}[kind]||kind)+' '+kind;});
@@ -64,11 +64,8 @@
   const fun=e.target.closest('[data-visual]');
   if(fun){
    e.preventDefault();
-   if(fun.dataset.visual==='pause'){
-    paused=!paused;document.body.classList.toggle('v-paused',paused);document.querySelectorAll('[data-learning=motion]').forEach(b=>b.textContent=paused?'Resume animation':'Pause animation');
-    document.querySelectorAll('[data-visual=pause]').forEach(b=>{b.textContent=paused?'Resume animation':'Pause animation';b.setAttribute('aria-pressed',String(paused));});return;
-   }
-   if(paused||reduced()){toast(paused?'Resume animation to make your buddy dance.':'Your device has reduced motion enabled. Your buddy is ready to cheer!');return;}
+
+   if(paused||reduced()){toast('Your device has reduced motion enabled. Your buddy is ready to cheer!');return;}
    const hero=fun.closest('.material-hero,.party-banner');if(hero.classList.contains('v-dancing'))return;
    hero.classList.add('v-dancing');setTimeout(()=>hero.classList.remove('v-dancing'),1800);
    const rect=hero.querySelector('.v-buddy').getBoundingClientRect();sparkle(rect.x+rect.width/2,rect.y+rect.height/2);return;

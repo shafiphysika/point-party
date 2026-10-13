@@ -33,22 +33,16 @@
  const svg=world=>`<svg viewBox="0 0 170 160" aria-hidden="true" focusable="false"><ellipse cx="84" cy="150" rx="50" ry="5" fill="#243d4b" opacity=".09"/><g stroke="#243d4b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${drawings[world]}</g></svg>`;
  const reduce=matchMedia('(prefers-reduced-motion: reduce)');
  const isQuiet=()=>document.body.classList.contains('v-paused')||reduce.matches;
- try{document.body.classList.toggle('v-paused',localStorage.getItem('pointparty-motion')==='paused');}catch{}
+ // Motion follows the device preference; legacy manual pause no longer applies.
+ document.body.classList.remove('v-paused');
  document.dispatchEvent(new Event('pointparty-motion-change'));
- function syncMotion(){
-  const paused=document.body.classList.contains('v-paused');
-  document.querySelectorAll('[data-world="motion"],[data-visual="pause"],[data-learning="motion"]').forEach(b=>{b.textContent=paused?'Resume animation':'Pause animation';b.setAttribute('aria-pressed',String(paused));});
-  document.querySelectorAll('.world-particles').forEach(el=>el.remove());
-  document.dispatchEvent(new Event('pointparty-motion-change'));
-  try{localStorage.setItem('pointparty-motion',paused?'paused':'playing');}catch{}
- }
  function decorate(){
   if(!view.isConnected||!document.body)return;
   const [world,title,description,action]=scenes[ui.mode]||scenes.setup;
   document.body.dataset.world=world;
   if(view.querySelector('.world-trail'))return;
   const trail=document.createElement('section');trail.className='world-trail';trail.dataset.page=ui.mode;trail.setAttribute('aria-label','Classroom adventure');
-  trail.innerHTML=`<div class="world-illustration">${svg(world)}</div><div class="world-copy"><small>CLASSGROVE · ${world==='workshop'?'IDEA WORKSHOP':world.toUpperCase()+' WORLD'}</small><h2>${title}</h2><p>${description}</p><div class="world-controls"><button type="button" class="world-play" data-world="play">${action} <span aria-hidden="true">✦</span></button><button type="button" class="world-motion" data-world="motion" aria-pressed="${document.body.classList.contains('v-paused')}">${document.body.classList.contains('v-paused')?'Resume animation':'Pause animation'}</button><span class="world-message" role="status"></span></div></div><div class="world-scenery" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>`;
+  trail.innerHTML=`<div class="world-illustration">${svg(world)}</div><div class="world-copy"><small>CLASSGROVE · ${world==='workshop'?'IDEA WORKSHOP':world.toUpperCase()+' WORLD'}</small><h2>${title}</h2><p>${description}</p><div class="world-controls"><button type="button" class="world-play" data-world="play">${action} <span aria-hidden="true">✦</span></button><span class="world-message" role="status"></span></div></div><div class="world-scenery" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>`;
   view.prepend(trail);
  }
  new MutationObserver(decorate).observe(view,{childList:true});
@@ -57,8 +51,6 @@
  const previousHub=MH.render.bind(MH);MH.render=function(){previousHub();decorate();};
  document.addEventListener('click',e=>{
   const control=e.target.closest('[data-world]');
-  if(control?.dataset.world==='motion'){document.body.classList.toggle('v-paused');syncMotion();return;}
-  if(e.target.closest('[data-visual="pause"],[data-learning="motion"]')){queueMicrotask(syncMotion);return;}
   if(control?.dataset.world!=='play')return;
   const trail=control.closest('.world-trail'),message=trail.querySelector('.world-message');
   message.textContent={garden:'A little kindness helps everyone bloom.',ocean:'Keep exploring. There is so much to discover!',space:'Mission kindness: ready for takeoff!',carnival:'Hooray for trying something new!',workshop:'Your next bright idea is waiting.'}[document.body.dataset.world];
