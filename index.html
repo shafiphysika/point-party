@@ -1124,7 +1124,7 @@ document.addEventListener("keydown",e=>{
 });
 </script>
 <script src="schools.js?v=20261013c"></script>
-<script src="portal-core.js?v=20261010"></script>
+<script src="portal-core.js?v=20261014classes"></script>
 <script src="portal.js?v=20261013"></script>
 <link rel="stylesheet" href="materials.css">
 <script src="materials-core.js"></script>
@@ -1137,7 +1137,8 @@ document.addEventListener("keydown",e=>{
 <link rel="stylesheet" href="lucky-dice.css?v=8">
 <script src="lucky-dice.js?v=8"></script>
 <link rel="stylesheet" href="worlds.css?v=2">
-<script src="worlds.js?v=grove-4"></script>
+<script src="rewards.js?v=1"></script>
+<script src="worlds.js?v=grove-5"></script>
 <link rel="stylesheet" href="classroom-layout.css?v=1">
 <script src="classroom-layout.js?v=1"></script>
 <link rel="stylesheet" href="account-entry.css?v=3">
@@ -1212,9 +1213,18 @@ body[data-world=ocean]:not(.account-locked) .world-trail{background:linear-gradi
 .side .brand .logo{background:#fff4d8;width:46px;height:46px;box-shadow:0 4px 0 #e5d7b3;overflow:visible}.grove-mark{width:46px;height:46px;overflow:visible}.grove-leaves{transform-origin:24px 27px;animation:grove-grow 4.5s ease-in-out infinite}.grove-star{transform-origin:39px 10px;animation:grove-twinkle 3s ease-in-out infinite}.world-illustration img.world-kids{width:275px;height:205px;left:-25px;top:-10px;object-fit:contain;animation:kids-play 6s ease-in-out infinite}.world-cheer .world-illustration img.world-kids{animation:kids-hurrah 1.2s ease-in-out}.world-cheer .world-message{font-weight:800}.world-kids~.planet-orbit{display:none}
 @keyframes grove-grow{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg) translateY(-1px)}}@keyframes grove-twinkle{50%{transform:scale(1.2);opacity:.7}}@keyframes kids-play{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}@keyframes kids-hurrah{35%{transform:translateY(-24px) rotate(-4deg) scale(1.04)}70%{transform:translateY(0) rotate(3deg)}100%{transform:none}}
 @media(max-width:900px){.world-illustration img.world-kids{width:185px;height:160px;left:-18px;top:-5px}}@media(max-width:520px){.world-illustration img.world-kids{width:145px;height:135px;left:-16px;top:-5px}}@media(prefers-reduced-motion:reduce){.grove-leaves,.grove-star,.world-illustration img.world-kids,.world-cheer .world-illustration img.world-kids{animation:none!important}}
+
+/* Gentle lighting and layers make the classroom feel tactile without moving the text. */
+body:not(.account-locked) .brand b{position:relative;text-shadow:0 1px #fff,0 2px 5px #78b39144;animation:grove-light 8s ease-in-out infinite}.grove-mark{filter:drop-shadow(0 2px 2px #86ba9450)}.world-illustration{transform:translateZ(24px)}.world-illustration img.world-kids{filter:drop-shadow(0 16px 7px #507b642b);animation-duration:var(--scene-time,6s)}.planet-stage{transform:rotateX(var(--scene-y,0deg)) rotateY(var(--scene-x,0deg)) rotateZ(var(--scene-offset,0deg))}.scene-motif{position:absolute;z-index:2;right:-4px;top:0;font-size:38px;filter:drop-shadow(0 6px 2px #57805b30);animation:motif-drift 5s ease-in-out infinite;pointer-events:none}.world-trail:before{background:radial-gradient(circle,#fff9,transparent 66%)}.world-trail{perspective:1000px}.card,.school-card,.team,.material-card,.reward-mission{transform-style:preserve-3d;box-shadow:0 6px 0 #dbe8df,0 14px 24px #7b957c12;transition:transform .25s,box-shadow .25s}.card .pet{filter:drop-shadow(0 6px 3px #72817b22)}.world-cheer .scene-motif{animation:motif-hurrah 1.2s ease-out}.world-cheer .world-kids{animation-duration:1.2s!important}
+.class-access-card{border:1px solid #d4e4da;border-radius:18px;padding:20px;margin:18px 0;background:#f8fcf8;min-width:0}.class-access-card legend{font-weight:800;color:#31594d;padding:0 8px}.class-access-card label{display:flex;align-items:center;gap:8px}.class-choice-grid{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}.class-choice-grid label{padding:9px 12px;background:#fff;border:1px solid #d1e4d8;border-radius:12px;box-shadow:0 3px 0 #dceadf}.class-scope-summary{font-size:.85rem;color:#627c72}.class-access-card [role=status]{display:block;margin-top:10px}
+.reward-heading{display:flex;align-items:center;gap:20px;justify-content:space-between}.reward-heading small{color:#718b79;letter-spacing:.09em;font-size:.65rem}.reward-heading h2{margin:6px 0}.reward-trophy{font-size:64px;filter:drop-shadow(0 6px 3px #be9a6033);animation:motif-drift 6s ease-in-out infinite}.reward-shelf{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:10px;margin:22px 0}.reward-token{background:#fff5d9;border:1px solid #eeddb5;border-radius:16px;padding:14px 8px;box-shadow:0 5px 0 #eadbb8;text-align:center;display:flex;flex-direction:column;gap:5px}.reward-token>span{font-size:32px;filter:drop-shadow(0 4px 2px #91793f33)}.reward-token b{font-size:.72rem}.reward-token small{font-size:.65rem;color:#756541}.reward-token.locked{background:#f3f6f4;border-color:#dce5df;box-shadow:0 4px 0 #dce5df}.reward-token.locked>span{opacity:.45}.reward-token.unlocked{background:#fff0bf;box-shadow:0 5px 0 #e1bd64,0 8px 16px #ffd1652b}.reward-next{color:#526d5e;font-weight:700;font-size:.86rem}.reward-missions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}.reward-mission{border:1px solid #cfe4d7;background:#eff9f2;border-radius:18px;padding:18px;text-align:left;color:#31594d;display:grid;gap:6px;cursor:pointer}.reward-mission>span{font-size:30px}.reward-mission b{font-size:1rem}.reward-mission small{font-size:.8rem;color:#627c72}.reward-mission strong{color:#926225;font-size:.86rem}.reward-mission:hover{transform:perspective(700px) translateY(-5px) rotateX(4deg);box-shadow:0 9px 0 #dbe8df,0 18px 24px #7b957c18}.reward-treats{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:.85rem}.personal-rewards{max-width:900px;margin:20px auto;background:#fff9ec;border-radius:22px;padding:20px;color:#31594d}.personal-rewards h2{font-size:1.3rem}.personal-rewards .reward-shelf{margin:14px 0}.personal-rewards .reward-token{padding:10px 5px}
+@keyframes grove-light{50%{text-shadow:0 1px #fff,0 0 13px #ffc968aa,0 2px 5px #78b39144}}@keyframes motif-drift{50%{transform:translateY(-7px) rotate(8deg)}}@keyframes motif-hurrah{40%{transform:translateY(-20px) rotate(20deg) scale(1.15)}100%{transform:none}}
+@media(max-width:1000px){.reward-shelf{grid-template-columns:repeat(4,minmax(0,1fr))}}@media(max-width:600px){.reward-missions{grid-template-columns:repeat(2,minmax(0,1fr))}.reward-mission{padding:14px}.scene-motif{font-size:25px;right:0;top:-5px}.reward-token{padding:10px 5px}.reward-token>span{font-size:25px}.reward-trophy{font-size:42px}.class-access-card{padding:14px}.personal-rewards .reward-shelf{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){body:not(.account-locked) .brand b,.scene-motif,.world-cheer .scene-motif,.reward-trophy{animation:none!important}.reward-mission:hover{transform:none}.planet-stage{transform:none}}
 </style>
 <script src="account-core.js?v=1"></script>
 <script src="account-entry.js?v=9"></script>
+<script src="class-access.js?v=1"></script>
 <script>render();initSync();PartyWorkspace.init();</script>
 </body>
 </html>

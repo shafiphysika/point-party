@@ -34,6 +34,8 @@
   if(/rate_limit|over_email_send|over_request/.test(code)||/rate limit/i.test(message))return 'Please wait before requesting another email code. Check your inbox and spam folder.';
   if(/email_address_not_authorized|email_send|smtp/i.test(code+' '+message))return 'Email delivery is not configured for this address. The administrator needs to connect the school email service.';
   if(/otp_expired|otp_disabled/.test(code))return 'This code has expired or is invalid. Request a new code and enter the most recent one.';
+  if(/CLASS_ACCESS_REQUIRED/.test(message))return 'This class is outside your assignment. Reload the school and choose one of your allowed classes.';
+  if(/CLASS_SCOPE_INVITE_REQUIRED/.test(message))return 'Ask the administrator to invite teachers. You can invite families only for your assigned classes.';
   if(/PERMISSION_/.test(message))return 'Your administrator has not enabled this tool for your school. Open My account to review your permissions.';
   if(/PGRST202|PGRST204|PGRST205|42P01|42703/.test(code)||/does not exist|schema cache/i.test(message))return 'The school database setup is incomplete. Ask the administrator to apply the school migrations, then refresh approvals.';
   if(/VERIFIED_EMAIL_REQUIRED/.test(message))return 'Verify your email with the latest sign-in link or code before opening your school.';
