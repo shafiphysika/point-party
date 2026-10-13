@@ -149,3 +149,16 @@ test('account-first entry hides device students and only unlocks a verified scho
   assert.equal(h.w.document.querySelector('#view').textContent,'');
  }finally{h.w.close();}
 });
+
+
+test('denied material access disables navigation and hides a previously opened resource view',()=>{
+ const h=site(true,true);try{
+  h.run(`PW.online=true;PW.accountReady=true;PW.sourceAccessReady=true;PW.permissionsReady=true;PW.school='school';PW.user={id:'teacher'};PW.members=[{school_id:'school',user_id:'teacher',status:'approved',permissions:{points:true,materials:false}}];CLASSES={'405':{names:['Learner']}};store.roster=CLASSES;ui.cur='405';ui.mode='materials';render();`);
+  const materials=h.w.document.querySelector('[data-page="materials"]');
+  assert.equal(materials.disabled,true);
+  assert.match(h.w.document.querySelector('#view').textContent,/has not enabled access/);
+  h.run(`PW.admin=true;render();`);
+  assert.equal(h.w.document.querySelector('[data-page="materials"]').disabled,false);
+  assert.ok(h.w.document.querySelector('[data-material="tab"]'));
+ }finally{h.w.close();}
+});
