@@ -1,4 +1,4 @@
-# Point Party school platform
+# ClassGrove school platform
 
 ## Objective and acceptance
 Extend the existing browser classroom board without losing school workspaces or

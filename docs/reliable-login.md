@@ -1,6 +1,6 @@
 # Account-first school access
 
-Opening Point Party shows the education login page. Device rosters are retained for administrator recovery and are not rendered for guests. An authenticated account opens only its approved online schools. The owner uses their existing email identity; co-teachers can use administrator-provided usernames.
+Opening ClassGrove shows the education login page. Device rosters are retained for administrator recovery and are not rendered for guests. An authenticated account opens only its approved online schools. The owner uses their existing email identity; co-teachers can use administrator-provided usernames.
 
 ## Backend deployment
 
@@ -25,3 +25,13 @@ The existing GitHub Pages address is already a free HTTPS website address. A new
 ## Validation and limits
 
 Automated tests cover guest rendering, first-password database enforcement, minimal teacher permissions, self-escalation denial, revocation, account provisioning authorization, rollback after failed membership setup, and preservation of online data during missing-class recovery. Real owner login, co-teacher provisioning, password change and cross-device online roster verification must also be completed against the deployed backend. Local tests do not prove those production steps occurred.
+
+## ClassGrove family portal
+
+Current site: https://shafiphysika.github.io/point-party/ . The repository slug and internal storage/account IDs remain compatible with existing records.
+
+Apply `supabase/family-accounts.sql` after the password and platform migrations. Redeploy `teacher-accounts.ts` with the new origin, retaining server `getUser` and database admin verification.
+
+Admin: open a school and class, then Student & parent portal. Choose the exact child and parent/student role, create a username and temporary password, and share credentials privately with the intended family. The family changes the password before accessing records. Parents are read-only; students submit published work. Revoke linked access in the same portal. No real family accounts are created by a code deployment.
+
+The downloadable QR in `assets/family-portal.svg` opens the sign-in route `#family` and contains no credentials or child data. Rebuild it if the public URL changes. Email invitations remain available for legacy users but require configured email delivery.

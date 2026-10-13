@@ -1,6 +1,6 @@
 # Animated classroom worlds
 
-All 20 Point Party pages now have their own adventure message in one of five illustrated worlds: garden, ocean, space, carnival, and idea workshop. Each world has an original SVG mascot, its own scenery and colors, gentle idle movement, and a short celebration activated by a button. Page arrivals, navigation icons, team stickers and button responses share the same motion style.
+All 20 ClassGrove pages now have their own adventure message in one of five illustrated worlds: garden, ocean, space, carnival, and idea workshop. Each world has an original SVG mascot, its own scenery and colors, gentle idle movement, and a short celebration activated by a button. Page arrivals, navigation icons, team stickers and button responses share the same motion style.
 
 Pause/resume works across the site and is remembered on this device. Operating-system reduced-motion preferences stop animations; the mascot button still gives a quiet encouraging message. Decorative particles are bounded, removed after the celebration, and removed when animation is paused. Motion also pauses when the page is hidden. Existing classroom scores, permissions and other actions stay in their existing modules.
 
