@@ -8,6 +8,7 @@
  }
  const patterns=[[5],[1,9],[1,5,9],[1,3,7,9],[1,3,5,7,9],[1,3,4,6,7,9]];
  const EFFECTS=[
+  {id:'wheel',label:'Name wheel',icon:'🎡',hint:'Spin the names in your selected class'},
   {id:'original',label:'Original',icon:'\u{1f3b2}',hint:'Classic 3D die with clatter and sparkle'},
   {id:'show',label:'Dice show',icon:'\u{1f31f}',hint:'Animated buddy and full-screen celebration'},
   {id:'machine',label:'Dice machine',icon:'\u{1f579}',hint:'Shake the chamber and reveal a lucky seat'},
@@ -19,6 +20,20 @@
  }
  function preference(){try{return resolveEffect(root.localStorage.getItem('pointparty-dice-effect'));}catch{return 'show';}}
  function setPreference(value){try{root.localStorage.setItem('pointparty-dice-effect',resolveEffect(value));}catch{}}
+ function wheelAngle(index,size){
+  if(!Number.isInteger(size)||size<1||size>60||!Number.isInteger(index)||index<0||index>=size)throw new RangeError('Invalid wheel segment');
+  return 2160-(index+.5)*360/size;
+ }
+ function wheelMarkup(pool,angle=0){
+  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  if(!pool.length)return '<div class="name-wheel"><p>No learners are available. Check attendance.</p></div>';
+  const colors=['#ace5c6','#ffd492','#f8bfc9','#b8e3ed','#e1d1f5','#e7efa5'],n=pool.length;
+  const point=a=>[200+188*Math.sin(a*Math.PI/180),200-188*Math.cos(a*Math.PI/180)].map(v=>v.toFixed(3)).join(' ');
+  return `<div class="name-wheel"><div class="wheel-frame"><span class="wheel-pointer" aria-hidden="true">▼</span><svg class="wheel-disc" viewBox="0 0 400 400" aria-label="Class name wheel" role="img" style="transform:rotate(${Number(angle)||0}deg)">${pool.map((s,i)=>{
+   const start=i*360/n,end=(i+1)*360/n,mid=(i+.5)*360/n,label=Array.from(String(s.name));
+   return `<g>${n===1?`<circle cx="200" cy="200" r="188" fill="${colors[0]}"/>`:`<path d="M200 200 L${point(start)} A188 188 0 ${end-start>180?1:0} 1 ${point(end)} Z" fill="${colors[i%colors.length]}" stroke="#fff" stroke-width="2"/>`}<text transform="rotate(${mid} 200 200)" x="200" y="68" text-anchor="middle" fill="#293b37" font-size="${n>30?9:n>12?12:16}" font-weight="700"><title>${esc(s.seat+' · '+s.name)}</title>${esc(s.seat+' '+label.slice(0,8).join('')+(label.length>8?'…':''))}</text></g>`;
+  }).join('')}</svg><span class="wheel-hub" aria-hidden="true">✦</span></div><details class="wheel-roster" open><summary>${n} names on this wheel · full names</summary><div>${pool.map(s=>`<span class="wheel-name">${esc(s.seat+' · '+s.name)}</span>`).join('')}</div></details></div>`;
+ }
  function buddy(){
   return `<div class="dice-buddy clay-dice-buddy" aria-hidden="true"><div class="baby-talk">Let's roll!</div><img src="assets/clay-teacher.png" alt="" width="1312" height="1199" draggable="false"></div>`;
  }
@@ -65,6 +80,6 @@
   const notes=mode==='machine'?[130,175,220,260]:mode==='magic'?[523,784,1047,1568]:mode==='original'?[240,320,280,400]:[392,523,659,784];
   notes.forEach((f,i)=>tone(f,.10,mode==='machine'?'sawtooth':'triangle',i*.11,.06));
  }
- const api={sound,randomIndex,markup,cinema,EFFECTS,resolveEffect,preference,setPreference};
+ const api={sound,randomIndex,markup,cinema,EFFECTS,resolveEffect,preference,setPreference,wheelAngle,wheelMarkup};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.LuckyDice=api;
 })(typeof window==='undefined'?globalThis:window);

@@ -546,6 +546,7 @@ RENDER.students=()=>{
   view.innerHTML=`<section class="party-banner"><span class="party-mascot" aria-hidden="true">🐣</span><div><small>Our classroom adventure</small><h2>Little efforts. Big celebrations!</h2><p>Grow your pet by helping, exploring, and trying again. Everyone has a chance to shine.</p></div><span class="party-sparkles" aria-hidden="true">✨🌈</span></section><div class="panel">
     <div class="bar t-only">
       <div class="seg" role="group" aria-label="What a tap does">
+        <button data-act="smode" data-v="profile" class="${sMode==='profile'?'on':''}">Hero profiles</button>
         <button data-act="smode" data-v="plus" class="${sMode==="plus"?"on":""}">Quick +1</button>
         <button data-act="smode" data-v="skill" class="${sMode==="skill"?"on":""}">🌈 Skill points</button>
         <button data-act="smode" data-v="minus" class="minus ${sMode==="minus"?"on":""}">Tap = −1</button>
@@ -562,6 +563,7 @@ RENDER.students=()=>{
   </div>`;
 };
 function tapStudent(seat){
+  if(sMode==='profile'){spotlight(seat);return;}
   const c=C();
   if(sMode==="absent"){snap();c.absent[seat]=!c.absent[seat];save();RENDER.students();return;}
   if(c.absent[seat]){toast("This student is marked absent");return;}
@@ -712,33 +714,37 @@ function openBox(i){
 
 /* ================= LUCKY PICK ================= */
 let rolling=false,noRepeat=true;
+let wheelLanding=0;
 const present=()=>{const c=C();return students(ui.cur).filter(s=>!c.absent[s.seat]);};
 RENDER.picker=()=>{
   const c=C(),pres=present(),left=pres.filter(s=>!c.picked.includes(s.seat)).length,last=c.last?students(ui.cur).find(s=>s.seat===c.last):null;
-  const effect=LuckyDice.preference();
+  const effect=LuckyDice.preference(),waiting=pres.filter(s=>!c.picked.includes(s.seat)),wheelPool=noRepeat&&waiting.length?waiting:pres;
   view.innerHTML=`<div class="panel">
-  <div class="dice-effect-heading"><h2>Choose your dice effect</h2><span>Four distinct ways to roll</span></div><div class="dice-effects" role="group" aria-label="Dice effects">${LuckyDice.EFFECTS.map(e=>`<button data-act="diceeffect" data-v="${e.id}" aria-pressed="${effect===e.id}"><span class="effect-icon" aria-hidden="true">${e.icon}</span><b>${e.label}</b><small>${e.hint}</small></button>`).join('')}</div>
-  <div class="stage lucky-stage effect-${effect} ${last?'has-winner':''}"><div class="pick-seat" id="pseat">${last?"Lucky student · Seat "+last.seat:"Who's feeling lucky?"}</div>${LuckyDice.markup(effect)}<div class="pick-name" id="pname" role="status" aria-live="polite">${last?esc(last.name):effect==='original'?'🎲':effect==='magic'?'Let the magician roll!':"Roll with your dice buddy!"}</div><p class="dice-hint">${effect==='original'?'The original simple draw.':effect==='magic'?'The wand taps the dice in a full-screen magic scene.':effect==='show'?'One big animated dice show.':last?'Your lucky number is on the dice!':'Tap the dice or roll below to find our lucky student.'}</p><button class="dice-tap" data-act="pick" aria-label="Roll the lucky dice"></button></div>
-  <div class="center"><button class="btn go big" data-act="pick">🎲 ${last?'Roll again':'Roll the lucky dice'}</button>${last?`<button class="btn big" data-act="pickplus">+1 point for ${esc(last.name)}</button>`:""}</div>
+  <div class="dice-effect-heading"><h2>Choose your lucky pick</h2><span>Spin names or roll the dice</span></div><div class="dice-effects" role="group" aria-label="Dice effects">${LuckyDice.EFFECTS.map(e=>`<button data-act="diceeffect" data-v="${e.id}" aria-pressed="${effect===e.id}"><span class="effect-icon" aria-hidden="true">${e.icon}</span><b>${e.label}</b><small>${e.hint}</small></button>`).join('')}</div>
+  <div class="stage lucky-stage effect-${effect} ${last?'has-winner':''}"><div class="pick-seat" id="pseat">${last?"Lucky student · Seat "+last.seat:"Who's feeling lucky?"}</div>${effect==='wheel'?LuckyDice.wheelMarkup(wheelPool,wheelLanding):LuckyDice.markup(effect)}<div class="pick-name" id="pname" role="status" aria-live="polite">${last?esc(last.name):effect==='wheel'?'Who will the wheel choose?':effect==='original'?'🎲':effect==='magic'?'Let the magician roll!':"Roll with your dice buddy!"}</div><p class="dice-hint">${effect==='wheel'?'Class '+esc(ui.cur)+' names · Present learners only. Every slice has the same chance.':effect==='original'?'The original simple draw.':effect==='magic'?'The wand taps the dice in a full-screen magic scene.':effect==='show'?'One big animated dice show.':last?'Your lucky number is on the dice!':'Tap the dice or roll below to find our lucky student.'}</p>${effect==='wheel'?'':'<button class="dice-tap" data-act="pick" aria-label="Roll the lucky dice"></button>'}</div>
+  <div class="center"><button class="btn go big" data-act="pick">🎲 ${effect==='wheel'?'Spin the name wheel':last?'Roll again':'Roll the lucky dice'}</button>${last?`<button class="btn big" data-act="pickplus">+1 point for ${esc(last.name)}</button>`:""}</div>
   <div class="center t-only" style="margin-top:14px">
     <div class="seg" role="group" aria-label="Repeats"><button data-act="norep" data-v="1" class="${noRepeat?"on":""}">Everyone gets a turn</button><button data-act="norep" data-v="0" class="${!noRepeat?"on":""}">Fully random</button></div>
     ${noRepeat?`<span class="stat" style="margin:0">Still waiting<b>${left}</b></span><button class="btn ghost" data-act="pickreset">Start over</button>`:""}
   </div></div>`;
-  if(last){$("#dice-number").textContent=last.seat;$("#dice-student").textContent=last.name;view.querySelector('.baby-talk').textContent="Your turn!";}
+  if(last&&effect!=='wheel'){$("#dice-number").textContent=last.seat;$("#dice-student").textContent=last.name;view.querySelector('.baby-talk').textContent="Your turn!";}
 };
 function pick(){
   if(rolling)return;const c=C(),pres=present();if(!pres.length){toast("Everyone is marked absent");return;}
   let pool=noRepeat?pres.filter(s=>!c.picked.includes(s.seat)):pres;
-  if(!pool.length){c.picked=[];pool=pres;toast("Everyone had a turn. New round!");}
+  const newRound=!pool.length;
+  if(newRound){pool=pres;toast("Everyone had a turn. New round!");}
   const win=pool[LuckyDice.randomIndex(pool.length)],classId=ui.cur,repeatMode=noRepeat,effect=LuckyDice.resolveEffect(LuckyDice.preference());
+  if(effect==='wheel'){wheelLanding=0;RENDER.picker();}
   rolling=true;const nm=$("#pname"),st=$("#pseat"),stageEl=nm.closest('.lucky-stage');
   stageEl.classList.remove('has-winner');stageEl.classList.add('is-rolling');stageEl.setAttribute('aria-busy','true');
   nm.textContent="Rolling…";st.textContent="Shaking up the luck!";
   stageEl.querySelector('.dice-hint').textContent="Here comes our lucky student…";
-  stageEl.querySelector('.baby-talk').textContent="Shake, shake!";
+  const talk=stageEl.querySelector('.baby-talk');if(talk)talk.textContent="Shake, shake!";
   view.querySelectorAll('[data-act="pick"],[data-act="pickplus"],[data-act="norep"],[data-act="pickreset"],[data-act="diceeffect"]').forEach(b=>b.disabled=true);
   const quiet=matchMedia('(prefers-reduced-motion: reduce)').matches||document.body.classList.contains('v-paused');
   const show=['show','machine','magic'].includes(effect)?LuckyDice.cinema(quiet,()=>pick(),effect):{close(){},finish(){}};
+  if(effect==='wheel'){const disk=stageEl.querySelector('.wheel-disc');disk.style.transition='none';disk.style.transform='rotate(0deg)';void disk.getBoundingClientRect();disk.style.transition=quiet?'none':'transform 2.2s cubic-bezier(.12,.65,.12,1)';wheelLanding=LuckyDice.wheelAngle(pool.indexOf(win),pool.length);disk.style.transform='rotate('+wheelLanding+'deg)';}
   if(!quiet&&ui.sound)LuckyDice.sound(effect,tone);
   let n=0;const step=()=>{
     if(!quiet&&ui.cur===classId&&ui.mode==='picker'&&ui.sound)tone(effect==='machine'?180+n*25:600+n*35,.04,'triangle',0,.04);
@@ -747,8 +753,13 @@ function pick(){
     rolling=false;
     // A navigation or school change cancels the draw rather than saving into another class.
     if(ui.cur!==classId||ui.mode!=='picker'||C()!==c){show.close();return;}
+    if(newRound)c.picked=[];
     c.last=win.seat;if(repeatMode&&!c.picked.includes(win.seat))c.picked.push(win.seat);
-    save();RENDER.picker();$("#pname").classList.add("done");show.finish(win);sfx.cheer();if(!quiet)confetti(35);
+    save();
+    // Refresh the turn count and award button while keeping the landed wheel.
+    const frame=effect==='wheel'?stageEl.querySelector('.name-wheel'):null;
+    RENDER.picker();if(frame)view.querySelector('.name-wheel').replaceWith(frame);
+    $("#pname").classList.add("done");show.finish(win);sfx.cheer();if(!quiet)confetti(35);
   };
   setTimeout(step,quiet?150:effect==='magic'?1350:100);
 }
@@ -1040,14 +1051,14 @@ document.addEventListener("click",e=>{
     const pointActions=['allskill','allplus','resetStu','spplus','newweek','tadd','resetTeams','pickplus','impapply'];
     const activityActions=['savegoal','tcount','shuffle','active','box','newboard','pick','pickreset','addlink','dellink'];
     const rosterActions=['savecls','delcls'];
-    const permission=rosterActions.includes(a)?'roster':activityActions.includes(a)?'activities':pointActions.includes(a)?'points':a==='stu'?(sMode==='absent'?'roster':'points'):null;
+    const permission=rosterActions.includes(a)?'roster':activityActions.includes(a)?'activities':pointActions.includes(a)?'points':a==='stu'?(sMode==='profile'?null:sMode==='absent'?'roster':'points'):null;
     if(permission&&!PartyWorkspace.can(permission)){toast('Ask your administrator to enable '+permission+' permission.');return;}
     if(a==='nav'&&['teams','mystery','picker'].includes(b.dataset.page)&&!PartyWorkspace.can('activities')){toast('Ask your administrator to enable activities permission.');return;}
     if(a==='undo'&&!['points','activities','roster'].every(k=>PartyWorkspace.can(k))){toast('Undo needs points, activities and roster permission.');return;}
     if(['delcls','savecls'].includes(a)&&!['points','activities','roster','materials'].every(k=>PartyWorkspace.can(k))){toast('Adding, editing or deleting a class needs all classroom editing permissions.');return;}
   }
   switch(a){
-    case "class":ui.cur=b.dataset.id;IMP=null;save("settings");render();break;
+    case "class":wheelLanding=0;ui.cur=b.dataset.id;IMP=null;save("settings");render();break;
     case "nav":ui.mode=b.dataset.page;saveLocal();render();window.scrollTo(0,0);break;
     case "sound":ui.sound=!ui.sound;saveLocal();renderShell();if(ui.sound)sfx.plus();break;
     case "present":togglePresent();break;
@@ -1076,10 +1087,10 @@ document.addEventListener("click",e=>{
     case "box":openBox(+b.dataset.i);break;
     case "newboard":snap();newBoard(C());save();RENDER.mystery();break;
     case "pick":pick();break;
-    case "diceeffect":if(rolling)break;LuckyDice.setPreference(b.dataset.v);RENDER.picker();break;
+    case "diceeffect":if(rolling)break;wheelLanding=0;LuckyDice.setPreference(b.dataset.v);RENDER.picker();break;
     case "pickplus":{const k=C();if(k.last&&!k.absent[k.last]){const bt=classTotal(k);snap();k.pts[k.last]=(k.pts[k.last]||0)+1;save();renderShell();sfx.plus();toast(`+1 for ${nameMap(ui.cur)[k.last]} (now ${k.pts[k.last]})`);checkGoal(bt);}break;}
     case "norep":if(rolling)break;noRepeat=b.dataset.v==="1";RENDER.picker();break;
-    case "pickreset":{if(rolling)break;snap();const k=C();k.picked=[];k.last=null;save();RENDER.picker();break;}
+    case "pickreset":{if(rolling)break;wheelLanding=0;snap();const k=C();k.picked=[];k.last=null;save();RENDER.picker();break;}
     case "tset":timerSet(+b.dataset.v);break;
     case "tgo":timerGo();break;
     case "tplus":timerPlus();break;
@@ -1135,9 +1146,10 @@ document.addEventListener("keydown",e=>{
 <link rel="stylesheet" href="visuals.css?v=2">
 <script src="visuals.js?v=light-20261013clay"></script>
 <link rel="stylesheet" href="lucky-dice.css?v=8">
-<script src="lucky-dice.js?v=8"></script>
+<script src="lucky-dice.js?v=9"></script>
 <link rel="stylesheet" href="worlds.css?v=2">
 <script src="rewards.js?v=2"></script>
+<script src="student-heroes.js?v=1"></script>
 <script src="worlds.js?v=grove-5"></script>
 <link rel="stylesheet" href="classroom-layout.css?v=1">
 <script src="classroom-layout.js?v=1"></script>
@@ -1222,6 +1234,37 @@ body:not(.account-locked) .brand b{position:relative;text-shadow:0 1px #fff,0 2p
 @media(max-width:1000px){.reward-shelf{grid-template-columns:repeat(4,minmax(0,1fr))}}@media(max-width:600px){.reward-missions{grid-template-columns:repeat(2,minmax(0,1fr))}.reward-mission{padding:14px}.scene-motif{font-size:25px;right:0;top:-5px}.reward-token{padding:10px 5px}.reward-token>span{font-size:25px}.reward-trophy{font-size:42px}.class-access-card{padding:14px}.personal-rewards .reward-shelf{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(prefers-reduced-motion:reduce){body:not(.account-locked) .brand b,.scene-motif,.world-cheer .scene-motif,.reward-trophy{animation:none!important}.reward-mission:hover{transform:none}.planet-stage{transform:none}}
 #overlay:has(.personal-rewards){justify-content:flex-start;overflow-y:auto;padding:24px 16px}#overlay:has(.personal-rewards)>*{flex-shrink:0}#overlay .personal-rewards{width:min(900px,100%)}
+</style>
+<style id="heroWheelStyles">
+/* Classroom motion: original vector heroes and an equal-slice name wheel. */
+.dice-effects{grid-template-columns:repeat(5,minmax(0,1fr))}
+.name-wheel{width:min(100%,520px);margin:16px auto;color:#294e43}
+.wheel-frame{position:relative;width:min(100%,360px);margin:auto;filter:drop-shadow(0 8px 0 #bad4c5) drop-shadow(0 14px 12px #52745d22)}
+.wheel-disc{display:block;width:100%;height:auto;border:10px solid #fff8e4;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 3px #cbab6c}
+.wheel-pointer{position:absolute;z-index:2;left:50%;top:-13px;transform:translateX(-50%);font-size:42px;color:#bc642f;text-shadow:0 -2px #fff;line-height:1}
+.wheel-hub{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:grid;place-items:center;width:60px;height:60px;background:#fffcf1;border:4px solid #fff;border-radius:50%;box-shadow:0 4px 0 #a7bda9;color:#bc852a;font-size:32px}
+.wheel-roster{text-align:left;font-size:.8rem;margin:18px 0 0;background:#fff9ed;border:1px solid #e8dfc6;padding:12px;border-radius:14px}
+.wheel-roster summary{cursor:pointer;font-weight:700}.wheel-roster>div{display:flex;flex-wrap:wrap;gap:6px;max-height:120px;overflow:auto;padding-top:10px}
+.wheel-name{border:1px solid #d3e5da;background:#f1faf4;border-radius:8px;padding:4px 8px;color:#365a4d;overflow-wrap:anywhere}
+.effect-wheel .pick-name{font-size:clamp(1.4rem,5vw,2.5rem);margin-top:12px}.effect-wheel .dice-hint{max-width:520px;margin:8px auto}.effect-wheel{padding:24px 12px!important}
+.card .hero-avatar{display:block;width:108px;height:122px;margin:-3px 0 -12px;filter:drop-shadow(0 5px 3px #41695020)}
+.card .hero-rank{font-size:.65rem;font-weight:700;color:#536e5f;background:#edf8ef;border-radius:8px;padding:3px 8px;margin:4px 0}
+.card:has(.hero-avatar) .pet{position:absolute;top:8px;right:8px;font-size:1.3rem;padding:4px;border-radius:50%;width:auto;height:auto;line-height:1}
+.hero-fly{transform-origin:80px 140px;animation:hero-float 5s ease-in-out infinite;animation-delay:var(--hero-delay,0s)}
+.hero-cape{transform-origin:80px 83px;animation:cape-breeze 3s ease-in-out infinite}.hero-spark{transform-origin:center;animation:hero-glimmer 4s ease-in-out infinite}
+.hero-passport{width:min(900px,100%);background:#fffdf3;color:#315347;border:2px solid #d8e9d7;border-radius:24px;padding:24px;margin:20px auto 0;text-align:left;box-shadow:0 7px 0 #b7cdb4,0 18px 40px #172e251c}
+.hero-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:.8rem;font-weight:700;margin-bottom:12px}.hero-points{display:block;font-size:1rem;margin:8px 0 12px}.hero-passport .btn.go{color:#315347!important;background:#ffe19a}.hero-passport .hero-actions .btn{white-space:nowrap}#overlay:has(.hero-passport){color:#315347;background:#eaf5ee}
+.passport-heading{display:flex;align-items:center;gap:20px}.passport-heading .hero-avatar{width:145px;height:164px;flex-shrink:0;filter:drop-shadow(0 7px 4px #48664422)}
+.passport-heading small{letter-spacing:.1em;color:#697c5c;font-size:.65rem}.passport-heading h2{font-size:1.7rem;margin:6px 0;color:#315347}.passport-heading p{font-size:.88rem}.hero-message{min-height:1.3em;color:#795922;font-weight:700}
+.hero-passport h3{font-size:1.1rem;margin:20px 0 6px}.hero-passport>p{font-size:.85rem}.hero-skills{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:16px}
+.hero-skill{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;border:1px dashed #cbd9cd;background:#f3f6ef;border-radius:14px;padding:12px 8px;overflow-wrap:anywhere}.hero-skill>span{font-size:26px}.hero-skill b{font-size:.75rem}.hero-skill small{font-size:.65rem;line-height:1.4}.hero-skill.earned{border:1px solid #e7c978;background:#fff1bf;box-shadow:0 3px 0 #e4d097}.hero-next{padding:14px;background:#e7f4e7;border-radius:12px;font-weight:700}
+#overlay .sp-pet.hero-companion{font-size:3rem}#overlay:has(.hero-passport) .sp-name{font-size:clamp(2rem,8vw,4rem)}
+.hero-cheering .hero-fly{animation:hero-hurrah 1.4s ease both}.hero-cheering .hero-spark{animation:hero-glimmer .5s ease 3}
+@keyframes hero-float{50%{transform:translateY(-5px) rotate(2deg)}}@keyframes cape-breeze{50%{transform:skewX(5deg) scaleX(1.04)}}@keyframes hero-glimmer{50%{opacity:.35;transform:scale(.9)}}@keyframes hero-hurrah{35%{transform:translateY(-20px) rotate(-7deg)}65%{transform:translateY(-8px) rotate(5deg)}}
+@media(max-width:700px){.dice-effects{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-skills{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-passport{padding:16px}.passport-heading{gap:10px}.passport-heading .hero-avatar{width:100px;height:120px}.passport-heading h2{font-size:1.25rem}.card .hero-avatar{width:88px;height:102px}}
+@media(prefers-reduced-motion:reduce){.hero-fly,.hero-cape,.hero-spark,.hero-cheering .hero-fly,.hero-cheering .hero-spark{animation:none!important}.wheel-disc{transition:none!important}}
+@media print{.hero-fly,.hero-cape,.hero-spark{animation:none}.wheel-roster>div{max-height:none}}
+
 </style>
 <script src="account-core.js?v=1"></script>
 <script src="account-entry.js?v=9"></script>
