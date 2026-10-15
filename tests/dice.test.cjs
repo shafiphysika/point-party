@@ -16,7 +16,7 @@ test('overlapping legacy modes migrate to one dice show',()=>{
  for(const mode of ['buddy','cinema','surprise'])assert.equal(dice.resolveEffect(mode),'show');
  for(const mode of ['original','show','machine','magic'])assert.equal(dice.resolveEffect(mode),mode);
  assert.equal(dice.resolveEffect('invalid'),'show');
- assert.deepEqual(dice.EFFECTS.map(e=>e.id),['original','show','machine','magic']);
+ assert.deepEqual(dice.EFFECTS.map(e=>e.id),['wheel','original','show','machine','magic']);
 });
 test('original die has visible six-sided pips and machine has its own chamber',()=>{
  assert.match(dice.markup('original'),/dice-face face-6/);

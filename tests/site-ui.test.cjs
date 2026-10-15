@@ -25,7 +25,7 @@ test('full site opens the learning hub before any class has been added',()=>{
 test('full site keeps the Original dice visible and consolidates legacy show choices',()=>{
  const h=site();try{
   h.run(`CLASSES={'101':{names:['Test learner']}};store.roster=CLASSES;store.classes={};ui.cur='101';ui.mode='picker';LuckyDice.setPreference('original');render();`);
-  assert.equal(h.w.document.querySelectorAll('.dice-effects button').length,4);
+  assert.equal(h.w.document.querySelectorAll('.dice-effects button').length,5);
   assert.ok(h.w.document.querySelector('.effect-original .dice-face.face-6'));
   h.w.document.querySelector('[data-act="diceeffect"][data-v="machine"]').click();
   assert.ok(h.w.document.querySelector('.machine-chamber'));
@@ -220,5 +220,44 @@ test('reward missions route to real skills without auto-awarding and personal mi
   h.w.document.querySelector('[data-reward-skill=kindness]').click();assert.equal(h.run('ui.mode'),'students');assert.equal(h.run('sMode'),'skill');assert.equal(h.run('C().pts[1]'),65);
   h.run('spotlight(1)');assert.equal(h.w.document.querySelectorAll('.personal-rewards .unlocked').length,6);assert.match(h.w.document.querySelector('.personal-rewards').textContent,/35 more points/);
   assert.equal(h.run('JSON.stringify(store.classes)'),before);
+ }finally{h.w.close();}
+});
+
+test('name wheel uses only the selected class and eligible present learners',()=>{
+ const h=site();try{
+  h.run(`CLASSES={'405':{names:['Alex','Mia','Ben']},'407':{names:['Other class']}};store.roster=CLASSES;store.classes={405:PartyCore.sanitizeClass({absent:{2:true},picked:[1]})};ui.cur='405';ui.mode='picker';LuckyDice.setPreference('wheel');render();`);
+  assert.deepEqual(Array.from(h.w.document.querySelectorAll('.wheel-name'),x=>x.textContent),['3 · Ben']);
+  h.w.document.querySelector('[data-act=norep][data-v="0"]').click();
+  assert.deepEqual(Array.from(h.w.document.querySelectorAll('.wheel-name'),x=>x.textContent),['1 · Alex','3 · Ben']);
+  h.run(`ui.cur='407';render()`);assert.match(h.w.document.querySelector('.name-wheel').textContent,/Other class/);
+ }finally{h.w.close();}
+});
+
+test('hero profiles celebrate actual skill records without modifying points or allowing a denied award',()=>{
+ const h=site();try{
+  h.run(`CLASSES={'405':{names:['Alex']}};store.roster=CLASSES;store.classes={};ui.cur='405';ui.mode='students';PartyCore.awardSkill(C(),1,'reading','2026-10-16');PW.online=true;PW.school='s';PW.user={id:'t'};PW.admin=false;PW.permissionsReady=true;PW.members=[{school_id:'s',user_id:'t',status:'approved',permissions:{points:false}}];render();`);
+  assert.equal(h.w.document.querySelectorAll('.card .hero-avatar').length,1);
+  const before=h.run('JSON.stringify(store.classes)');
+  h.w.document.querySelector('[data-act=smode][data-v=profile]').click();h.w.document.querySelector('[data-act=stu]').click();
+  assert.match(h.w.document.querySelector('.hero-passport').textContent,/Reading explorer/);
+  assert.match(h.w.document.querySelector('.hero-passport').textContent,/1 recognition/);
+  assert.equal(h.run('JSON.stringify(store.classes)'),before);
+  h.w.document.querySelector('[data-act=spplus]').click();assert.equal(h.run('JSON.stringify(store.classes)'),before);
+ }finally{h.w.close();}
+});
+
+test('successive wheel spins land on the matching eligible names and navigation cancels a new round',async()=>{
+ const h=site();try{
+  h.run(`CLASSES={'405':{names:['Alex','Mia','Ben']},'407':{names:['Other']}};store.roster=CLASSES;store.classes={};ui.cur='405';ui.mode='picker';LuckyDice.setPreference('wheel');LuckyDice.randomIndex=()=>0;render();`);
+  for(let i=1;i<=2;i++){
+   h.w.document.querySelector('[data-act=pick]').click();
+   await new Promise(r=>setTimeout(r,200));
+   assert.equal(h.run('C().last'),i);assert.equal(h.w.document.querySelectorAll('.wheel-name').length,4-i);
+   assert.equal(h.w.document.querySelector('.wheel-disc').style.transform,`rotate(${h.w.LuckyDice.wheelAngle(0,4-i)}deg)`);
+   assert.equal(h.run('C().pts[1]||0'),0);
+  }
+  h.run(`C().picked=[1,2,3];render();`);const before=h.run('JSON.stringify(store.classes[405])');
+  h.w.document.querySelector('[data-act=pick]').click();h.run(`ui.cur='407';render();`);await new Promise(r=>setTimeout(r,200));
+  assert.equal(h.run('JSON.stringify(store.classes[405])'),before);
  }finally{h.w.close();}
 });
