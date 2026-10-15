@@ -236,7 +236,7 @@ test('name wheel uses only the selected class and eligible present learners',()=
 test('hero profiles celebrate actual skill records without modifying points or allowing a denied award',()=>{
  const h=site();try{
   h.run(`CLASSES={'405':{names:['Alex']}};store.roster=CLASSES;store.classes={};ui.cur='405';ui.mode='students';PartyCore.awardSkill(C(),1,'reading','2026-10-16');PW.online=true;PW.school='s';PW.user={id:'t'};PW.admin=false;PW.permissionsReady=true;PW.members=[{school_id:'s',user_id:'t',status:'approved',permissions:{points:false}}];render();`);
-  assert.equal(h.w.document.querySelectorAll('.card .hero-avatar').length,1);
+  assert.equal(h.w.document.querySelectorAll('.card .hero-avatar').length,0);assert.ok(h.w.document.querySelector('.card .pet'));
   const before=h.run('JSON.stringify(store.classes)');
   h.w.document.querySelector('[data-act=smode][data-v=profile]').click();h.w.document.querySelector('[data-act=stu]').click();
   assert.match(h.w.document.querySelector('.hero-passport').textContent,/Reading explorer/);
