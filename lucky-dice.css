@@ -98,3 +98,11 @@
 @media(prefers-reduced-motion:reduce){.dice-buddy,.buddy-arm,.machine-lever{animation:none!important}}
 .v-paused .dice-buddy,.v-paused .buddy-arm,.v-paused .machine-lever{animation:none!important}
 .cinema-machine .lucky-dice-scene{--die:clamp(130px,32vh,300px)}
+
+/* 3D carnival name wheel */
+.name-wheel .wheel-frame{width:min(100%,440px);padding:6px;filter:drop-shadow(0 10px 0 #1f2340) drop-shadow(0 22px 18px rgba(31,35,64,.28));}
+.name-wheel .wheel-frame .wheel-disc{border:0;border-radius:50%;background:transparent;box-shadow:none;overflow:visible;}
+.name-wheel .wheel-label{font-family:"Baloo 2","Nunito","Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;letter-spacing:.02em;}
+.name-wheel .wheel-gloss{position:absolute;inset:6px;border-radius:50%;pointer-events:none;background:radial-gradient(ellipse 70% 45% at 38% 22%,rgba(255,255,255,.45),rgba(255,255,255,0) 70%);mix-blend-mode:screen;}
+.name-wheel .wheel-pointer{top:-20px;font-size:0;line-height:0;text-shadow:none;filter:drop-shadow(0 4px 0 rgba(31,35,64,.9));}
+.name-wheel .wheel-hub{width:72px;height:72px;font-size:34px;color:#fff;background:radial-gradient(circle at 35% 30%,#ffe98a,#ffb800 60%,#e08a00);border:5px solid #1f2340;box-shadow:0 5px 0 #1f2340,inset 0 -6px 0 rgba(0,0,0,.12);text-shadow:0 2px 0 #1f2340;}
