@@ -106,3 +106,12 @@
 .name-wheel .wheel-gloss{position:absolute;inset:6px;border-radius:50%;pointer-events:none;background:radial-gradient(ellipse 70% 45% at 38% 22%,rgba(255,255,255,.45),rgba(255,255,255,0) 70%);mix-blend-mode:screen;}
 .name-wheel .wheel-pointer{top:-20px;font-size:0;line-height:0;text-shadow:none;filter:drop-shadow(0 4px 0 rgba(31,35,64,.9));}
 .name-wheel .wheel-hub{width:72px;height:72px;font-size:34px;color:#fff;background:radial-gradient(circle at 35% 30%,#ffe98a,#ffb800 60%,#e08a00);border:5px solid #1f2340;box-shadow:0 5px 0 #1f2340,inset 0 -6px 0 rgba(0,0,0,.12);text-shadow:0 2px 0 #1f2340;}
+
+/* Bigger, tappable name wheel without the name table */
+.lucky-stage .name-wheel{width:min(100%,680px);}
+.lucky-stage .name-wheel .wheel-frame{width:min(100%,620px);cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .15s ease;}
+.lucky-stage .name-wheel .wheel-frame:active{transform:scale(.97);}
+.lucky-stage .name-wheel .wheel-pointer{top:-26px;}
+.lucky-stage .name-wheel .wheel-pointer svg{width:58px;height:74px;}
+.lucky-stage .name-wheel .wheel-hub{width:92px;height:92px;font-size:44px;}
+.lucky-stage .name-wheel .wheel-roster{position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
