@@ -27,12 +27,19 @@
  function wheelMarkup(pool,angle=0){
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   if(!pool.length)return '<div class="name-wheel"><p>No learners are available. Check attendance.</p></div>';
-  const colors=['#ace5c6','#ffd492','#f8bfc9','#b8e3ed','#e1d1f5','#e7efa5'],n=pool.length;
-  const point=a=>[200+188*Math.sin(a*Math.PI/180),200-188*Math.cos(a*Math.PI/180)].map(v=>v.toFixed(3)).join(' ');
-  return `<div class="name-wheel"><div class="wheel-frame"><span class="wheel-pointer" aria-hidden="true">▼</span><svg class="wheel-disc" viewBox="0 0 400 400" aria-label="Class name wheel" role="img" style="transform:rotate(${Number(angle)||0}deg)">${pool.map((s,i)=>{
-   const start=i*360/n,end=(i+1)*360/n,mid=(i+.5)*360/n,label=Array.from(String(s.name));
-   return `<g>${n===1?`<circle cx="200" cy="200" r="188" fill="${colors[0]}"/>`:`<path d="M200 200 L${point(start)} A188 188 0 ${end-start>180?1:0} 1 ${point(end)} Z" fill="${colors[i%colors.length]}" stroke="#fff" stroke-width="2"/>`}<text transform="rotate(${mid} 200 200)" x="200" y="68" text-anchor="middle" fill="#293b37" font-size="${n>30?9:n>12?12:16}" font-weight="700"><title>${esc(s.seat+' · '+s.name)}</title>${esc(s.seat+' '+label.slice(0,8).join('')+(label.length>8?'…':''))}</text></g>`;
-  }).join('')}</svg><span class="wheel-hub" aria-hidden="true">✦</span></div><details class="wheel-roster" open><summary>${n} names on this wheel · full names</summary><div>${pool.map(s=>`<span class="wheel-name">${esc(s.seat+' · '+s.name)}</span>`).join('')}</div></details></div>`;
+  const colors=['#ff6b6b','#ffa94d','#ffd43b','#69db7c','#38d9a9','#4dabf7','#9775fa','#f783ac'],n=pool.length,R=176,ink='#1f2340';
+  const point=(a,r=R)=>[200+r*Math.sin(a*Math.PI/180),200-r*Math.cos(a*Math.PI/180)].map(v=>v.toFixed(3)).join(' ');
+  const colorAt=i=>colors[(i===n-1&&n>1&&i%colors.length===0)?3:i%colors.length];
+  const ems=t=>Array.from(t).reduce((w,c)=>w+(/[\u2e80-\u9fff\uac00-\ud7af\uff00-\uffef]/.test(c)?1:.62),0);
+  const avail=122,fsArc=Math.min(22,2*Math.PI*118/n*.6);
+  const bulbs=Math.max(16,Math.min(36,n*2));
+  return `<div class="name-wheel"><div class="wheel-frame"><span class="wheel-pointer" aria-hidden="true"><svg viewBox="0 0 44 56" width="44" height="56"><path d="M5 5H39L22 51Z" fill="#ff3d6e" stroke="#1f2340" stroke-width="4" stroke-linejoin="round"/><path d="M13 10H25L19 27Z" fill="#fff" opacity=".5"/></svg></span><svg class="wheel-disc" viewBox="0 0 400 400" aria-label="Class name wheel" role="img" style="transform:rotate(${Number(angle)||0}deg)"><defs><radialGradient id="wheel-dome" cx="50%" cy="50%" r="50%"><stop offset="55%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".22"/></radialGradient><linearGradient id="wheel-rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b3f73"/><stop offset="1" stop-color="#1f2340"/></linearGradient></defs><circle cx="200" cy="200" r="198" fill="url(#wheel-rim)"/>${pool.map((s,i)=>{
+   const start=i*360/n,end=(i+1)*360/n,mid=(start+end)/2,full=Array.from(String(s.name)),name=full.length>10?full.slice(0,9).join('')+'\u2026':full.join('');
+   const fs=Math.max(8,Math.min(fsArc,avail/(ems(name)+ems(String(s.seat))*.72+.4))).toFixed(1);
+   const slice=n===1?`<circle cx="200" cy="200" r="${R}" fill="${colors[0]}"/>`:`<path d="M200 200 L${point(start)} A${R} ${R} 0 ${end-start>180?1:0} 1 ${point(end)} Z" fill="${colorAt(i)}" stroke="${ink}" stroke-width="2.5" stroke-linejoin="round"/>`;
+   const label=n===1?`<text x="200" y="120" text-anchor="middle" dominant-baseline="central"`:`<text transform="rotate(${(mid-90).toFixed(3)} 200 200)" x="${200+R-12}" y="200" text-anchor="end" dominant-baseline="central"`;
+   return `<g>${slice}${label} class="wheel-label" font-size="${fs}" fill="#fff" stroke="${ink}" stroke-width="${(fs*.24).toFixed(2)}" stroke-linejoin="round" paint-order="stroke" font-weight="800"><title>${esc(s.seat+' · '+s.name)}</title><tspan font-size="${(fs*.72).toFixed(1)}" fill="#fff8d6">${esc(s.seat)}</tspan> ${esc(name)}</text></g>`;
+  }).join('')}<circle cx="200" cy="200" r="${R}" fill="url(#wheel-dome)" pointer-events="none"/><circle cx="200" cy="200" r="${R}" fill="none" stroke="${ink}" stroke-width="4"/>${Array.from({length:bulbs},(_,i)=>`<circle cx="${point(i*360/bulbs,188).split(' ')[0]}" cy="${point(i*360/bulbs,188).split(' ')[1]}" r="4.2" fill="${i%2?'#fff':'#ffe066'}" stroke="${ink}" stroke-width="1.5"/>`).join('')}</svg><span class="wheel-gloss" aria-hidden="true"></span><span class="wheel-hub" aria-hidden="true">✦</span></div><details class="wheel-roster" open><summary>${n} names on this wheel · full names</summary><div>${pool.map(s=>`<span class="wheel-name">${esc(s.seat+' · '+s.name)}</span>`).join('')}</div></details></div>`;
  }
  function buddy(){
   return `<div class="dice-buddy clay-dice-buddy" aria-hidden="true"><div class="baby-talk">Let's roll!</div><img src="assets/clay-teacher.png" alt="" width="1312" height="1199" draggable="false"></div>`;
